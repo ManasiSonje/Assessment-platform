@@ -1,0 +1,757 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Assessment Platform</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', Tahoma, Geneva, sans-serif; }
+        body { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); min-height: 100vh; }
+        
+        /* Login */
+        .login-container { display: flex; justify-content: center; align-items: center; min-height: 100vh; }
+        .login-box { background: white; padding: 50px; border-radius: 20px; box-shadow: 0 20px 60px rgba(0,0,0,0.3); width: 400px; text-align: center; }
+        .login-box h1 { color: #333; margin-bottom: 10px; font-size: 28px; }
+        .login-box p { color: #666; margin-bottom: 30px; }
+        .role-btn { width: 100%; padding: 18px; margin-bottom: 15px; border: 2px solid #667eea; background: white; color: #667eea; font-size: 16px; font-weight: 600; border-radius: 10px; cursor: pointer; transition: all 0.3s; }
+        .role-btn:hover { background: #667eea; color: white; transform: translateY(-2px); }
+        
+        /* Dashboard Layout */
+        .app-container { display: none; min-height: 100vh; }
+        .sidebar { width: 260px; background: #1a1a2e; color: white; position: fixed; height: 100vh; padding: 20px 0; transition: width 0.3s; z-index: 100; }
+        .sidebar.collapsed { width: 70px; }
+        .sidebar.collapsed .menu-text, .sidebar.collapsed .sidebar h2 { display: none; }
+        .sidebar.collapsed .menu-item { justify-content: center; padding: 15px; }
+        .sidebar.collapsed .menu-item span { margin: 0; }
+        .sidebar h2 { padding: 20px; text-align: center; border-bottom: 1px solid rgba(255,255,255,0.1); margin-bottom: 20px; font-size: 20px; }
+        .menu-item { padding: 15px 25px; cursor: pointer; transition: all 0.3s; display: flex; align-items: center; }
+        .menu-item:hover, .menu-item.active { background: #16213e; border-left: 4px solid #667eea; }
+        .menu-item span { margin-left: 10px; }
+        .menu-item .icon { width: 20px; text-align: center; }
+        
+        .main { margin-left: 260px; padding: 30px; background: #f5f5f5; min-height: 100vh; transition: margin-left 0.3s; }
+        .main.sidebar-collapsed { margin-left: 70px; }
+        
+        /* Toggle Button */
+        .toggle-btn { position: absolute; top: 15px; right: -15px; background: #667eea; color: white; border: none; border-radius: 50%; width: 30px; height: 30px; cursor: pointer; display: flex; align-items: center; justify-content: center; z-index: 101; box-shadow: 0 2px 5px rgba(0,0,0,0.2); }
+        .toggle-btn:hover { background: #5568d3; }
+        .header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px; background: white; padding: 20px 30px; border-radius: 10px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
+        .header h1 { color: #333; font-size: 24px; }
+        .user-badge { background: #667eea; color: white; padding: 8px 16px; border-radius: 20px; font-size: 14px; }
+        
+        /* Cards */
+        .stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 20px; margin-bottom: 30px; }
+        .stat-card { background: white; padding: 25px; border-radius: 10px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); }
+        .stat-card h3 { color: #666; font-size: 14px; margin-bottom: 10px; text-transform: uppercase; }
+        .stat-card .value { font-size: 32px; font-weight: bold; color: #333; }
+        
+        /* Table */
+        .card { background: white; border-radius: 10px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); overflow: hidden; }
+        .card-header { padding: 20px 25px; border-bottom: 1px solid #eee; display: flex; justify-content: space-between; align-items: center; }
+        .card-header h2 { color: #333; font-size: 18px; }
+        table { width: 100%; border-collapse: collapse; }
+        th, td { padding: 15px 25px; text-align: left; border-bottom: 1px solid #eee; }
+        th { background: #f8f9fa; color: #666; font-size: 12px; text-transform: uppercase; }
+        tr:hover { background: #f8f9fa; }
+        
+        /* Badge */
+        .badge { padding: 5px 12px; border-radius: 15px; font-size: 12px; font-weight: 600; }
+        .badge-easy { background: #d4edda; color: #155724; }
+        .badge-medium { background: #fff3cd; color: #856404; }
+        .badge-hard { background: #f8d7da; color: #721c24; }
+        .badge-passed { background: #d4edda; color: #155724; }
+        .badge-failed { background: #f8d7da; color: #721c24; }
+        .badge-pending { background: #fff3cd; color: #856404; }
+        
+        /* Buttons */
+        .btn { padding: 10px 20px; border: none; border-radius: 8px; cursor: pointer; font-size: 14px; font-weight: 500; transition: all 0.3s; }
+        .btn-primary { background: #667eea; color: white; }
+        .btn-primary:hover { background: #5568d3; }
+        .btn-success { background: #28a745; color: white; }
+        .btn-danger { background: #dc3545; color: white; }
+        .btn-sm { padding: 6px 12px; font-size: 12px; }
+        
+        /* Form */
+        .form-section { display: none; }
+        .form-section.active { display: block; }
+        .form-card { background: white; padding: 30px; border-radius: 10px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); max-width: 700px; }
+        .form-group { margin-bottom: 20px; }
+        .form-group label { display: block; margin-bottom: 8px; color: #333; font-weight: 500; }
+        .form-group input, .form-group textarea, .form-group select { width: 100%; padding: 12px; border: 1px solid #ddd; border-radius: 8px; font-size: 14px; }
+        .form-group textarea { min-height: 100px; resize: vertical; }
+        .form-group input:focus, .form-group textarea:focus, .form-group select:focus { outline: none; border-color: #667eea; }
+        
+        /* Test Card */
+        .test-container { display: none; }
+        .test-container.active { display: block; }
+        .test-header { background: white; padding: 20px 30px; border-radius: 10px; margin-bottom: 20px; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
+        .test-header h2 { color: #333; }
+        .timer { font-size: 24px; font-weight: bold; color: #667eea; background: #f8f9fa; padding: 10px 20px; border-radius: 8px; }
+        .question-card { background: white; padding: 30px; border-radius: 10px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); }
+        .question-title { font-size: 20px; color: #333; margin-bottom: 15px; }
+        .question-desc { color: #666; line-height: 1.6; margin-bottom: 20px; }
+        .io-box { background: #f8f9fa; padding: 15px; border-radius: 8px; margin-bottom: 10px; }
+        .io-box strong { color: #333; display: block; margin-bottom: 5px; }
+        
+        /* Code Editor */
+        .code-area { background: #1e1e1e; padding: 20px; border-radius: 8px; margin-top: 20px; }
+        .code-area textarea { width: 100%; min-height: 250px; background: #1e1e1e; color: #d4d4d4; border: none; font-family: 'Consolas', monospace; font-size: 14px; resize: vertical; }
+        
+        /* Result */
+        .result-box { margin-top: 20px; padding: 20px; border-radius: 8px; display: none; white-space: pre-wrap; font-family: monospace; }
+        .result-box.show { display: block; }
+        .result-success { background: #d4edda; color: #155724; }
+        .result-failed { background: #f8d7da; color: #721c24; }
+        
+        /* Loading */
+        .loading { text-align: center; padding: 40px; color: #666; }
+        .spinner { width: 40px; height: 40px; border: 4px solid #f3f3f3; border-top: 4px solid #667eea; border-radius: 50%; animation: spin 1s linear infinite; margin: 0 auto 20px; }
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+        
+        /* Nav */
+        .page { display: none; }
+        .page.active { display: block; }
+    </style>
+</head>
+<body>
+
+<!-- LOGIN SCREEN -->
+<div id="loginScreen" class="login-container">
+    <div class="login-box">
+        <h1>Assessment Platform</h1>
+        <p>Select your role to continue</p>
+        <button class="role-btn" onclick="login('admin')">Admin Dashboard</button>
+        <button class="role-btn" onclick="login('student')">Student Test Portal</button>
+    </div>
+</div>
+
+<!-- ADMIN INTERFACE -->
+<div id="adminApp" class="app-container">
+    <div class="sidebar" id="adminSidebar">
+        <button class="toggle-btn" onclick="toggleSidebar('admin')">☰</button>
+        <h2>Admin Panel</h2>
+        <div class="menu-item active" data-page="dashboard" onclick="navigate('dashboard')">
+            <span class="icon">📊</span><span class="menu-text">Dashboard</span>
+        </div>
+        <div class="menu-item" data-page="questions" onclick="navigate('questions')">
+            <span class="icon">❓</span><span class="menu-text">Questions</span>
+        </div>
+        <div class="menu-item" data-page="create" onclick="navigate('create')">
+            <span class="icon">➕</span><span class="menu-text">Upload Question</span>
+        </div>
+        <div class="menu-item" data-page="submissions" onclick="navigate('submissions')">
+            <span class="icon">📝</span><span class="menu-text">Submissions</span>
+        </div>
+        <div class="menu-item" data-page="logout" onclick="logout()" style="margin-top: auto; border-top: 1px solid rgba(255,255,255,0.1);">
+            <span class="icon">🚪</span><span class="menu-text">Logout</span>
+        </div>
+    </div>
+    <div class="main" id="adminMain">
+        <div class="header">
+            <h1>Dashboard</h1>
+            <button class="btn btn-danger" onclick="logout()">Logout</button>
+        </div>
+        
+        <!-- Dashboard Page -->
+        <div id="page-dashboard" class="page active">
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <h3>Total Questions</h3>
+                    <div class="value" id="statQuestions">0</div>
+                </div>
+                <div class="stat-card">
+                    <h3>Total Submissions</h3>
+                    <div class="value" id="statSubmissions">0</div>
+                </div>
+                <div class="stat-card">
+                    <h3>Passed</h3>
+                    <div class="value" id="statPassed">0</div>
+                </div>
+                <div class="stat-card">
+                    <h3>Failed</h3>
+                    <div class="value" id="statFailed">0</div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Questions Page -->
+        <div id="page-questions" class="page">
+            <div class="card" style="margin-bottom: 20px;">
+                <div class="card-header">
+                    <h2>All Questions</h2>
+                    <button class="btn btn-primary" onclick="navigate('create')">+ Add Question</button>
+                </div>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Title</th>
+                            <th>Difficulty</th>
+                            <th>Test Cases</th>
+                            <th>Created</th>
+                        </tr>
+                    </thead>
+                    <tbody id="questionsList"></tbody>
+                </table>
+            </div>
+        </div>
+        
+        <!-- Create Question Page -->
+        <div id="page-create" class="page">
+            <div class="form-card">
+                <h2 style="margin-bottom: 25px; color: #333;">Upload New Question</h2>
+                <form id="questionForm" onsubmit="saveQuestion(event)">
+                    <div class="form-group">
+                        <label>Title *</label>
+                        <input type="text" id="qTitle" required placeholder="e.g., Two Sum">
+                    </div>
+                    <div class="form-group">
+                        <label>Description</label>
+                        <textarea id="qDesc" placeholder="Problem description..."></textarea>
+                    </div>
+                    <div class="form-group">
+                        <label>Difficulty *</label>
+                        <select id="qDifficulty" required>
+                            <option value="">Select</option>
+                            <option value="EASY">Easy</option>
+                            <option value="MEDIUM">Medium</option>
+                            <option value="HARD">Hard</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>Constraints</label>
+                        <input type="text" id="qConstraints" placeholder="e.g., 1 <= n <= 1000">
+                    </div>
+                    <div class="form-group">
+                        <label>Sample Input</label>
+                        <input type="text" id="qSampleInput" placeholder="Sample input for students">
+                    </div>
+                    <div class="form-group">
+                        <label>Sample Output</label>
+                        <input type="text" id="qSampleOutput" placeholder="Expected output">
+                    </div>
+                    <div class="form-group">
+                        <label>Time Limit (ms)</label>
+                        <input type="number" id="qTimeLimit" value="1000">
+                    </div>
+                    <hr style="margin: 25px 0; border: none; border-top: 1px solid #eee;">
+                    <h3 style="margin-bottom: 15px; color: #333;">Test Cases</h3>
+                    <div id="testCasesContainer">
+                        <div class="form-group test-case">
+                            <input type="text" id="tcInput1" placeholder="Input">
+                            <input type="text" id="tcOutput1" placeholder="Expected Output" style="margin-top:10px;">
+                            <label style="margin-top:10px;"><input type="checkbox" id="tcHidden1"> Hidden Test Case</label>
+                        </div>
+                    </div>
+                    <button type="button" class="btn btn-sm btn-primary" onclick="addTestCase()" style="margin-bottom:20px;">+ Add Test Case</button>
+                    <br>
+                    <button type="submit" class="btn btn-primary">Create Question</button>
+                </form>
+            </div>
+        </div>
+        
+        <!-- Submissions Page -->
+        <div id="page-submissions" class="page">
+            <div class="card">
+                <div class="card-header">
+                    <h2>Recent Submissions</h2>
+                </div>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Question</th>
+                            <th>Language</th>
+                            <th>Status</th>
+                            <th>Score</th>
+                            <th>Date</th>
+                        </tr>
+                    </thead>
+                    <tbody id="submissionsList">
+                        <tr><td colspan="6" class="loading">No submissions yet</td></tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- STUDENT INTERFACE -->
+<div id="studentApp" class="app-container">
+    <div class="sidebar" id="studentSidebar">
+        <button class="toggle-btn" onclick="toggleSidebar('student')">☰</button>
+        <h2>Student Portal</h2>
+        <div class="menu-item active" data-page="tests" onclick="navigate('tests')">
+            <span class="icon">📋</span><span class="menu-text">Available Tests</span>
+        </div>
+        <div class="menu-item" data-page="my-subs" onclick="navigate('my-subs')">
+            <span class="icon">📝</span><span class="menu-text">My Submissions</span>
+        </div>
+        <div class="menu-item" data-page="logout" onclick="logout()" style="margin-top: auto; border-top: 1px solid rgba(255,255,255,0.1);">
+            <span class="icon">🚪</span><span class="menu-text">Logout</span>
+        </div>
+    </div>
+    <div class="main" id="studentMain">
+        <div class="header">
+            <h1>Available Tests</h1>
+            <button class="btn btn-danger" onclick="logout()">Logout</button>
+        </div>
+        
+        <!-- Tests List -->
+        <div id="page-tests" class="page active">
+            <div class="card">
+                <div class="card-header">
+                    <h2>Coding Problems</h2>
+                </div>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Title</th>
+                            <th>Difficulty</th>
+                            <th>Test Cases</th>
+                            <th>Action</th>
+                        </tr>
+                    </thead>
+                    <tbody id="testsList"></tbody>
+                </table>
+            </div>
+        </div>
+        
+        <!-- Take Test -->
+        <div id="page-take-test" class="page test-container">
+            <div class="test-header">
+                <h2 id="testTitle"></h2>
+                <div class="timer" id="timer">00:00</div>
+            </div>
+            <div class="question-card">
+                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px;">
+                    <div class="question-title" id="qTitle"></div>
+                    <span class="badge" id="qDifficulty"></span>
+                </div>
+                <div class="question-desc" id="qDesc"></div>
+                <div class="io-box"><strong>Sample Input:</strong><span id="qInput"></span></div>
+                <div class="io-box"><strong>Sample Output:</strong><span id="qOutput"></span></div>
+                
+                <div class="form-group" style="margin-top:20px;">
+                    <label style="display:block; margin-bottom:8px; color:#333; font-weight:500;">Your Code:</label>
+                    <div class="code-area">
+                        <textarea id="codeEditor" placeholder="Write your code here..."></textarea>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label>Language:</label>
+                    <select id="langSelect" onchange="updateBoilerplate()">
+                        <option value="PYTHON">Python</option>
+                        <option value="JAVA">Java</option>
+                        <option value="CPP">C++</option>
+                    </select>
+                </div>
+                <button class="btn btn-success" onclick="submitCode()">Submit Solution</button>
+                <button class="btn btn-danger" onclick="navigate('tests')" style="margin-left:10px;">Cancel</button>
+                
+                <div id="resultBox" class="result-box">
+                    <h3 id="resultStatus"></h3>
+                    <p id="resultScore"></p>
+                    <p id="resultTests"></p>
+                </div>
+            </div>
+        </div>
+        
+        <!-- My Submissions -->
+        <div id="page-my-subs" class="page">
+            <div class="card">
+                <div class="card-header">
+                    <h2>My Submissions</h2>
+                </div>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Question</th>
+                            <th>Status</th>
+                            <th>Score</th>
+                            <th>Date</th>
+                        </tr>
+                    </thead>
+                    <tbody id="mySubsList">
+                        <tr><td colspan="5" class="loading">No submissions yet</td></tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+const API = 'http://localhost:8083/api/v1';
+let currentUser = 1;
+let testQuestionId = null;
+let testTimer = null;
+
+// Login
+function login(role) {
+    document.getElementById('loginScreen').style.display = 'none';
+    if (role === 'admin') {
+        document.getElementById('adminApp').style.display = 'block';
+        navigate('dashboard');
+    } else {
+        document.getElementById('studentApp').style.display = 'block';
+        navigate('tests');
+    }
+}
+
+// Toggle Sidebar
+function toggleSidebar(app) {
+    const sidebar = document.getElementById(app + 'Sidebar');
+    const main = document.getElementById(app + 'Main');
+    sidebar.classList.toggle('collapsed');
+    main.classList.toggle('sidebar-collapsed');
+}
+
+// Logout
+function logout() {
+    if (confirm('Are you sure you want to logout?')) {
+        location.reload();
+    }
+}
+
+// Navigation
+function navigate(pageId) {
+    document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+    document.querySelectorAll('.menu-item').forEach(m => m.classList.remove('active'));
+    
+    const pageEl = document.getElementById('page-' + pageId);
+    if (pageEl) {
+        pageEl.classList.add('active');
+    }
+    
+    // Update menu in current sidebar
+    const activeApp = document.getElementById('adminApp').style.display === 'block' ? 'admin' : 'student';
+    const sidebar = document.getElementById(activeApp + 'Sidebar');
+    const menuItems = sidebar.querySelectorAll('.menu-item');
+    menuItems.forEach(m => {
+        if (m.dataset.page === pageId) m.classList.add('active');
+    });
+    
+    // Load data
+    if (pageId === 'dashboard') loadDashboard();
+    if (pageId === 'questions') loadQuestions();
+    if (pageId === 'tests') loadTests();
+    if (pageId === 'my-subs') loadMySubmissions();
+}
+
+// Admin Dashboard
+async function loadDashboard() {
+    try {
+        const r = await fetch(API + '/questions').then(x => x.json());
+        const questions = r.data || [];
+        document.getElementById('statQuestions').textContent = questions.length;
+        
+        let totalSubs = 0, passed = 0, failed = 0;
+        for (let q of questions) {
+            try {
+                const sr = await fetch(API + '/submissions/user/' + currentUser).then(x => x.json());
+                const subs = sr.data || [];
+                totalSubs += subs.length;
+                for (let s of subs) {
+                    if (s.status === 'PASSED') passed++;
+                    else if (s.status === 'FAILED') failed++;
+                }
+            } catch(e) {}
+        }
+        document.getElementById('statSubmissions').textContent = totalSubs;
+        document.getElementById('statPassed').textContent = passed;
+        document.getElementById('statFailed').textContent = failed;
+    } catch(e) {
+        console.error(e);
+    }
+}
+
+// Load Questions
+async function loadQuestions() {
+    try {
+        const r = await fetch(API + '/questions').then(x => x.json());
+        const questions = r.data || [];
+        const tbody = document.getElementById('questionsList');
+        
+        if (questions.length === 0) {
+            tbody.innerHTML = '<tr><td colspan="5" class="loading">No questions yet</td></tr>';
+            return;
+        }
+        
+        tbody.innerHTML = questions.map(q => `
+            <tr>
+                <td>${q.id}</td>
+                <td>${q.title}</td>
+                <td><span class="badge badge-${q.difficulty.toLowerCase()}">${q.difficulty}</span></td>
+                <td>${q.testCaseCount || 0}</td>
+                <td>${formatDate(q.createdAt)}</td>
+            </tr>
+        `).join('');
+    } catch(e) {
+        document.getElementById('questionsList').innerHTML = '<tr><td colspan="5" class="loading">Error loading</td></tr>';
+    }
+}
+
+// Save Question
+async function saveQuestion(e) {
+    e.preventDefault();
+    
+    const testCases = [];
+    const tcInputs = document.querySelectorAll('[id^="tcInput"]');
+    const tcOutputs = document.querySelectorAll('[id^="tcOutput"]');
+    const tcHiddens = document.querySelectorAll('[id^="tcHidden"]');
+    
+    tcInputs.forEach((input, i) => {
+        if (input.value) {
+            testCases.push({
+                input: input.value,
+                expectedOutput: tcOutputs[i] ? tcOutputs[i].value : '',
+                isHidden: tcHiddens[i] ? tcHiddens[i].checked : false,
+                isSample: i === 0
+            });
+        }
+    });
+    
+    if (testCases.length === 0) {
+        testCases.push({ input: '', expectedOutput: '', isHidden: false, isSample: true });
+    }
+    
+    const data = {
+        title: document.getElementById('qTitle').value,
+        description: document.getElementById('qDesc').value,
+        difficulty: document.getElementById('qDifficulty').value,
+        constraints: document.getElementById('qConstraints').value,
+        sampleInput: document.getElementById('qSampleInput').value,
+        sampleOutput: document.getElementById('qSampleOutput').value,
+        timeLimit: parseInt(document.getElementById('qTimeLimit').value),
+        testCases: testCases
+    };
+    
+    try {
+        const res = await fetch(API + '/questions', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(data)
+        });
+        const result = await res.json();
+        
+        if (result.success) {
+            alert('Question created successfully!');
+            document.getElementById('questionForm').reset();
+            navigate('questions');
+        } else {
+            alert('Error: ' + result.message);
+        }
+    } catch(e) {
+        alert('Error creating question');
+    }
+}
+
+function addTestCase() {
+    const container = document.getElementById('testCasesContainer');
+    const count = container.children.length + 1;
+    const div = document.createElement('div');
+    div.className = 'form-group test-case';
+    div.innerHTML = `
+        <input type="text" id="tcInput${count}" placeholder="Input">
+        <input type="text" id="tcOutput${count}" placeholder="Expected Output" style="margin-top:10px;">
+        <label style="margin-top:10px;"><input type="checkbox" id="tcHidden${count}"> Hidden Test Case</label>
+    `;
+    container.appendChild(div);
+}
+
+// Student Tests
+async function loadTests() {
+    try {
+        const r = await fetch(API + '/questions').then(x => x.json());
+        const questions = r.data || [];
+        const tbody = document.getElementById('testsList');
+        
+        if (questions.length === 0) {
+            tbody.innerHTML = '<tr><td colspan="5" class="loading">No tests available</td></tr>';
+            return;
+        }
+        
+        tbody.innerHTML = questions.map(q => `
+            <tr>
+                <td>${q.id}</td>
+                <td>${q.title}</td>
+                <td><span class="badge badge-${q.difficulty.toLowerCase()}">${q.difficulty}</span></td>
+                <td>${q.testCaseCount || 0}</td>
+                <td><button class="btn btn-sm btn-success" onclick="startTest(${q.id})">Start Test</button></td>
+            </tr>
+        `).join('');
+    } catch(e) {
+        document.getElementById('testsList').innerHTML = '<tr><td colspan="5" class="loading">Error loading</td></tr>';
+    }
+}
+
+// Start Test
+async function startTest(qid) {
+    testQuestionId = qid;
+    
+    try {
+        const r = await fetch(API + '/questions/' + qid).then(x => x.json());
+        const q = r.data;
+        
+        if (!q) { alert('Question not found'); return; }
+        
+        document.getElementById('testTitle').textContent = q.title;
+        document.getElementById('qTitle').textContent = q.title;
+        document.getElementById('qDifficulty').textContent = q.difficulty;
+        document.getElementById('qDifficulty').className = 'badge badge-' + q.difficulty.toLowerCase();
+        document.getElementById('qDesc').textContent = q.description || 'No description';
+        document.getElementById('qInput').textContent = q.sampleInput || '-';
+        document.getElementById('qOutput').textContent = q.sampleOutput || '-';
+        
+        // Set default boilerplate code
+        document.getElementById('codeEditor').value = getBoilerplateCode('PYTHON');
+        document.getElementById('resultBox').classList.remove('show');
+        
+        // Timer (10 minutes)
+        let timeLeft = (q.timeLimit || 600);
+        updateTimerDisplay(timeLeft);
+        if (testTimer) clearInterval(testTimer);
+        testTimer = setInterval(() => {
+            timeLeft--;
+            updateTimerDisplay(timeLeft);
+            if (timeLeft <= 0) {
+                clearInterval(testTimer);
+                alert('Time up! Auto-submitting your code...');
+                submitCode();
+            }
+        }, 1000);
+        
+        navigate('take-test');
+    } catch(e) {
+        alert('Error loading question');
+    }
+}
+
+function getBoilerplateCode(lang) {
+    if (lang === 'PYTHON') {
+        return `# input_data contains the test case input\ns = input_data.strip()\n# Write your logic here\nprint("")`;
+    }
+    if (lang === 'JAVA') {
+        return `// input_data contains the test case input\nString s = input_data.trim();\n// Write your logic here\nSystem.out.println("");`;
+    }
+    if (lang === 'CPP') {
+        return `// input_data contains the test case input\nstring s = input_data;\n// Write your logic here\ncout << "" << endl;`;
+    }
+    return '';
+}
+
+function updateBoilerplate() {
+    const lang = document.getElementById('langSelect').value;
+    document.getElementById('codeEditor').value = getBoilerplateCode(lang);
+}
+
+function formatTime(seconds) {
+    const m = Math.floor(seconds / 60);
+    const s = seconds % 60;
+    return `${m.toString().padStart(2,'0')}:${s.toString().padStart(2,'0')}`;
+}
+
+function updateTimerDisplay(timeLeft) {
+    const timerEl = document.getElementById('timer');
+    timerEl.textContent = formatTime(timeLeft);
+    // Red color when time is low
+    if (timeLeft <= 60) {
+        timerEl.style.color = '#dc3545';
+        timerEl.style.background = '#f8d7da';
+    } else {
+        timerEl.style.color = '#667eea';
+        timerEl.style.background = '#f8f9fa';
+    }
+}
+
+// Submit Code
+async function submitCode() {
+    if (testTimer) clearInterval(testTimer);
+    
+    const code = document.getElementById('codeEditor').value;
+    if (!code.trim()) { alert('Write your code first'); return; }
+    
+    const data = {
+        questionId: testQuestionId,
+        language: document.getElementById('langSelect').value,
+        sourceCode: code
+    };
+    
+    try {
+        const res = await fetch(API + '/submissions?userId=' + currentUser, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(data)
+        });
+        const result = await res.json();
+        const d = result.data;
+        
+        const box = document.getElementById('resultBox');
+        box.classList.add('show');
+        
+        if (d) {
+            box.classList.remove('result-success', 'result-failed');
+            box.classList.add(d.status === 'PASSED' ? 'result-success' : 'result-failed');
+            document.getElementById('resultStatus').textContent = d.status;
+            document.getElementById('resultScore').textContent = 'Score: ' + d.score + '%';
+            
+            // Build detailed results
+            let details = 'Passed: ' + d.passedCount + '/' + d.totalCount + ' test cases\n\n';
+            if (d.results && d.results.length > 0) {
+                d.results.forEach((r, i) => {
+                    details += (i+1) + '. ';
+                    details += 'Expected: ' + r.expectedOutput + ' | Got: ' + r.actualOutput + ' ';
+                    details += r.isPassed ? '✓' : '✗';
+                    details += '\n';
+                });
+            }
+            document.getElementById('resultTests').textContent = details;
+        } else {
+            box.classList.add('result-failed');
+            document.getElementById('resultStatus').textContent = 'Error';
+            document.getElementById('resultScore').textContent = result.message;
+        }
+    } catch(e) {
+        document.getElementById('resultBox').classList.add('result-failed', 'show');
+        document.getElementById('resultStatus').textContent = 'Error';
+        document.getElementById('resultScore').textContent = 'Submission failed';
+    }
+}
+
+// My Submissions
+async function loadMySubmissions() {
+    try {
+        const r = await fetch(API + '/submissions/user/' + currentUser).then(x => x.json());
+        const subs = r.data || [];
+        const tbody = document.getElementById('mySubsList');
+        
+        if (subs.length === 0) {
+            tbody.innerHTML = '<tr><td colspan="5" class="loading">No submissions yet</td></tr>';
+            return;
+        }
+        
+        tbody.innerHTML = subs.map(s => `
+            <tr>
+                <td>${s.id}</td>
+                <td>Question ${s.questionId}</td>
+                <td><span class="badge badge-${s.status.toLowerCase()}">${s.status}</span></td>
+                <td>${s.score}%</td>
+                <td>${formatDate(s.createdAt)}</td>
+            </tr>
+        `).join('');
+    } catch(e) {
+        document.getElementById('mySubsList').innerHTML = '<tr><td colspan="5" class="loading">Error loading</td></tr>';
+    }
+}
+
+function formatDate(ts) {
+    if (!ts) return '-';
+    return new Date(ts).toLocaleDateString();
+}
+</script>
+
+</body>
+</html>

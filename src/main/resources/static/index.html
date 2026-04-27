@@ -1,0 +1,1018 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Assessment Platform</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            background: #f5f7fa;
+            min-height: 100vh;
+        }
+
+        /* Sidebar */
+        .sidebar {
+            width: 250px;
+            background: #1e3a5f;
+            color: white;
+            position: fixed;
+            height: 100vh;
+            padding: 20px 0;
+            left: 0;
+            top: 0;
+        }
+
+        .sidebar h2 {
+            padding: 20px;
+            text-align: center;
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+            margin-bottom: 20px;
+        }
+
+        .menu-item {
+            padding: 15px 25px;
+            cursor: pointer;
+            transition: all 0.3s;
+            display: flex;
+            align-items: center;
+        }
+
+        .menu-item:hover, .menu-item.active {
+            background: #2d5a8a;
+            border-left: 4px solid #4fc3f7;
+        }
+
+        .menu-item span {
+            margin-left: 10px;
+        }
+
+        /* Main Content */
+        .main-content {
+            margin-left: 250px;
+            padding: 30px;
+        }
+
+        /* Header */
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 30px;
+        }
+
+        .header h1 {
+            color: #1e3a5f;
+        }
+
+        .user-info {
+            background: white;
+            padding: 10px 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+
+        /* Dashboard Cards */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .stat-card {
+            background: white;
+            padding: 25px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+
+        .stat-card h3 {
+            color: #666;
+            font-size: 14px;
+            margin-bottom: 10px;
+        }
+
+        .stat-card .number {
+            font-size: 36px;
+            font-weight: bold;
+            color: #1e3a5f;
+        }
+
+        /* Tables */
+        .table-container {
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            overflow: hidden;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        th, td {
+            padding: 15px;
+            text-align: left;
+            border-bottom: 1px solid #eee;
+        }
+
+        th {
+            background: #f8f9fa;
+            font-weight: 600;
+            color: #1e3a5f;
+        }
+
+        tr:hover {
+            background: #f8f9fa;
+        }
+
+        /* Buttons */
+        .btn {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 14px;
+            transition: all 0.3s;
+        }
+
+        .btn-primary {
+            background: #1e3a5f;
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: #2d5a8a;
+        }
+
+        .btn-success {
+            background: #28a745;
+            color: white;
+        }
+
+        .btn-danger {
+            background: #dc3545;
+            color: white;
+        }
+
+        .btn-sm {
+            padding: 5px 10px;
+            font-size: 12px;
+        }
+
+        /* Forms */
+        .form-container {
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            max-width: 600px;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 500;
+            color: #1e3a5f;
+        }
+
+        .form-group input,
+        .form-group select,
+        .form-group textarea {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            font-size: 14px;
+        }
+
+        .form-group textarea {
+            min-height: 100px;
+            resize: vertical;
+        }
+
+        .test-case-row {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 10px;
+            align-items: flex-start;
+        }
+
+        .test-case-row input {
+            flex: 1;
+        }
+
+        /* Code Editor */
+        .code-editor {
+            background: #1e1e1e;
+            color: #d4d4d4;
+            padding: 20px;
+            border-radius: 8px;
+            font-family: 'Consolas', monospace;
+            min-height: 300px;
+        }
+
+        .code-editor textarea {
+            width: 100%;
+            min-height: 300px;
+            background: #1e1e1e;
+            color: #d4d4d4;
+            border: none;
+            font-family: inherit;
+            font-size: 14px;
+            resize: vertical;
+        }
+
+        /* Badges */
+        .badge {
+            padding: 5px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 500;
+        }
+
+        .badge-easy {
+            background: #d4edda;
+            color: #155724;
+        }
+
+        .badge-medium {
+            background: #fff3cd;
+            color: #856404;
+        }
+
+        .badge-hard {
+            background: #f8d7da;
+            color: #721c24;
+        }
+
+        .badge-passed {
+            background: #d4edda;
+            color: #155724;
+        }
+
+        .badge-failed {
+            background: #f8d7da;
+            color: #721c24;
+        }
+
+        .badge-pending {
+            background: #fff3cd;
+            color: #856404;
+        }
+
+        /* Page Sections */
+        .page {
+            display: none;
+        }
+
+        .page.active {
+            display: block;
+        }
+
+        /* Quiz/Test Interface */
+        .question-card {
+            background: white;
+            padding: 25px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            margin-bottom: 20px;
+        }
+
+        .question-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+
+        .question-title {
+            font-size: 20px;
+            font-weight: bold;
+            color: #1e3a5f;
+        }
+
+        .question-description {
+            color: #666;
+            line-height: 1.6;
+            margin-bottom: 20px;
+        }
+
+        .io-box {
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 6px;
+            margin-bottom: 10px;
+        }
+
+        .io-box strong {
+            display: block;
+            margin-bottom: 5px;
+            color: #1e3a5f;
+        }
+
+        .result-message {
+            padding: 15px;
+            border-radius: 8px;
+            margin-top: 15px;
+        }
+
+        .result-success {
+            background: #d4edda;
+            color: #155724;
+        }
+
+        .result-failed {
+            background: #f8d7da;
+            color: #721c24;
+        }
+
+        /* Timer */
+        .timer {
+            background: white;
+            padding: 15px 25px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            font-size: 24px;
+            font-weight: bold;
+            color: #1e3a5f;
+        }
+
+        /* Login Screen */
+        .login-screen {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            background: linear-gradient(135deg, #1e3a5f 0%, #2d5a8a 100%);
+        }
+
+        .login-box {
+            background: white;
+            padding: 40px;
+            border-radius: 15px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.3);
+            text-align: center;
+            width: 350px;
+        }
+
+        .login-box h2 {
+            color: #1e3a5f;
+            margin-bottom: 30px;
+        }
+
+        .role-buttons {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        .role-btn {
+            padding: 20px;
+            font-size: 18px;
+            border: 2px solid #1e3a5f;
+            background: white;
+            color: #1e3a5f;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .role-btn:hover {
+            background: #1e3a5f;
+            color: white;
+        }
+
+        /* Loading */
+        .loading {
+            text-align: center;
+            padding: 40px;
+            color: #666;
+        }
+
+        .spinner {
+            border: 3px solid #f3f3f3;
+            border-top: 3px solid #1e3a5f;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 20px;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .actions {
+            display: flex;
+            gap: 10px;
+            margin-top: 15px;
+        }
+    </style>
+</head>
+<body>
+    <!-- Login Screen -->
+    <div id="loginScreen" class="login-screen">
+        <div class="login-box">
+            <h2>Assessment Platform</h2>
+            <p style="margin-bottom: 30px; color: #666;">Select your role to continue</p>
+            <div class="role-buttons">
+                <button class="role-btn" onclick="showDashboard('admin')">Admin Dashboard</button>
+                <button class="role-btn" onclick="showDashboard('student')">Student Test Portal</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Admin Sidebar -->
+    <div id="adminSidebar" class="sidebar" style="display: none;">
+        <h2>Admin Panel</h2>
+        <div class="menu-item active" onclick="showPage('dashboard')">
+            <span>Dashboard</span>
+        </div>
+        <div class="menu-item" onclick="showPage('questions')">
+            <span>Manage Questions</span>
+        </div>
+        <div class="menu-item" onclick="showPage('create-question')">
+            <span>Upload Questions</span>
+        </div>
+        <div class="menu-item" onclick="showPage('submissions')">
+            <span>Submissions</span>
+        </div>
+        <div class="menu-item" onclick="logout()">
+            <span>Logout</span>
+        </div>
+    </div>
+
+    <!-- Student Sidebar -->
+    <div id="studentSidebar" class="sidebar" style="display: none;">
+        <h2>Student Portal</h2>
+        <div class="menu-item active" onclick="showPage('available-tests')">
+            <span>Available Tests</span>
+        </div>
+        <div class="menu-item" onclick="showPage('my-submissions')">
+            <span>My Submissions</span>
+        </div>
+        <div class="menu-item" onclick="logout()">
+            <span>Logout</span>
+        </div>
+    </div>
+
+    <!-- Main Content -->
+    <div id="mainContent" class="main-content" style="display: none;">
+        <!-- Admin Dashboard -->
+        <div id="page-dashboard" class="page">
+            <div class="header">
+                <h1>Dashboard</h1>
+                <div class="user-info">Welcome, Admin</div>
+            </div>
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <h3>Total Questions</h3>
+                    <div class="number" id="totalQuestions">0</div>
+                </div>
+                <div class="stat-card">
+                    <h3>Total Submissions</h3>
+                    <div class="number" id="totalSubmissions">0</div>
+                </div>
+                <div class="stat-card">
+                    <h3>Passed</h3>
+                    <div class="number" id="passedSubmissions">0</div>
+                </div>
+                <div class="stat-card">
+                    <h3>Failed</h3>
+                    <div class="number" id="failedSubmissions">0</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Questions List -->
+        <div id="page-questions" class="page">
+            <div class="header">
+                <h1>Questions</h1>
+                <button class="btn btn-primary" onclick="showPage('create-question')">+ Add Question</button>
+            </div>
+            <div class="table-container">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Title</th>
+                            <th>Difficulty</th>
+                            <th>Test Cases</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody id="questionsTableBody">
+                        <tr>
+                            <td colspan="5" class="loading">
+                                <div class="spinner"></div>
+                                Loading...
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Create Question -->
+        <div id="page-create-question" class="page">
+            <div class="header">
+                <h1>Upload Question</h1>
+            </div>
+            <div class="form-container">
+                <form id="questionForm">
+                    <div class="form-group">
+                        <label>Title *</label>
+                        <input type="text" name="title" required placeholder="Enter question title">
+                    </div>
+                    <div class="form-group">
+                        <label>Description</label>
+                        <textarea name="description" placeholder="Enter question description"></textarea>
+                    </div>
+                    <div class="form-group">
+                        <label>Difficulty *</label>
+                        <select name="difficulty" required>
+                            <option value="">Select difficulty</option>
+                            <option value="EASY">Easy</option>
+                            <option value="MEDIUM">Medium</option>
+                            <option value="HARD">Hard</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>Constraints</label>
+                        <input type="text" name="constraints" placeholder="e.g., 1 <= n <= 1000">
+                    </div>
+                    <div class="form-group">
+                        <label>Sample Input</label>
+                        <input type="text" name="sampleInput" placeholder="Sample input">
+                    </div>
+                    <div class="form-group">
+                        <label>Sample Output</label>
+                        <input type="text" name="sampleOutput" placeholder="Sample output">
+                    </div>
+                    <div class="form-group">
+                        <label>Time Limit (ms)</label>
+                        <input type="number" name="timeLimit" value="1000">
+                    </div>
+                    
+                    <h3 style="margin: 20px 0; color: #1e3a5f;">Test Cases</h3>
+                    <div id="testCasesContainer">
+                        <div class="test-case-row">
+                            <input type="text" name="tcInput[]" placeholder="Input">
+                            <input type="text" name="tcOutput[]" placeholder="Expected Output">
+                            <input type="checkbox" name="tcHidden[]"> Hidden
+                            <button type="button" class="btn btn-danger btn-sm" onclick="addTestCase()">+</button>
+                        </div>
+                    </div>
+                    
+                    <button type="submit" class="btn btn-primary">Create Question</button>
+                </form>
+            </div>
+        </div>
+
+        <!-- Submissions (Admin) -->
+        <div id="page-submissions" class="page">
+            <div class="header">
+                <h1>Submissions</h1>
+            </div>
+            <div class="table-container">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Question</th>
+                            <th>Language</th>
+                            <th>Status</th>
+                            <th>Score</th>
+                            <th>Date</th>
+                        </tr>
+                    </thead>
+                    <tbody id="submissionsTableBody">
+                        <tr>
+                            <td colspan="6" class="loading">
+                                <div class="spinner"></div>
+                                Loading...
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Available Tests -->
+        <div id="page-available-tests" class="page">
+            <div class="header">
+                <h1>Available Tests</h1>
+                <div class="user-info">Student ID: <span id="studentUserId">1</span></div>
+            </div>
+            <div class="table-container">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Title</th>
+                            <th>Difficulty</th>
+                            <th>Test Cases</th>
+                            <th>Action</th>
+                        </tr>
+                    </thead>
+                    <tbody id="availableTestsBody">
+                        <tr>
+                            <td colspan="5" class="loading">
+                                <div class="spinner"></div>
+                                Loading...
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Take Test -->
+        <div id="page-take-test" class="page">
+            <div class="header">
+                <h1 id="testQuestionTitle">Take Test</h1>
+                <div class="timer" id="testTimer">00:00</div>
+            </div>
+            <div class="question-card">
+                <div class="question-header">
+                    <div class="question-title" id="qtTitle"></div>
+                    <span class="badge" id="qtDifficulty"></span>
+                </div>
+                <div class="question-description" id="qtDescription"></div>
+                
+                <div class="io-box">
+                    <strong>Sample Input:</strong>
+                    <span id="qtSampleInput">-</span>
+                </div>
+                <div class="io-box">
+                    <strong>Sample Output:</strong>
+                    <span id="qtSampleOutput">-</span>
+                </div>
+                
+                <div class="form-group" style="margin-top: 20px;">
+                    <label>Your Code:</label>
+                    <div class="code-editor">
+                        <textarea id="codeEditor" placeholder="Write your code here..."></textarea>
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    <label>Language:</label>
+                    <select id="languageSelect">
+                        <option value="PYTHON">Python</option>
+                        <option value="JAVA">Java</option>
+                        <option value="CPP">C++</option>
+                    </select>
+                </div>
+                
+                <button class="btn btn-primary" onclick="submitTest()">Submit Solution</button>
+                <button class="btn btn-danger" onclick="showPage('available-tests')">Cancel</button>
+            </div>
+            
+            <div id="testResult" style="display: none;"></div>
+        </div>
+
+        <!-- My Submissions -->
+        <div id="page-my-submissions" class="page">
+            <div class="header">
+                <h1>My Submissions</h1>
+            </div>
+            <div class="table-container">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Question</th>
+                            <th>Status</th>
+                            <th>Score</th>
+                            <th>Date</th>
+                        </tr>
+                    </thead>
+                    <tbody id="mySubmissionsBody">
+                        <tr>
+                            <td colspan="5" class="loading">
+                                <div class="spinner"></div>
+                                Loading...
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <script src="js/api.js"></script>
+    <script>
+        let currentRole = '';
+        let currentUserId = 1;
+        let currentQuestionId = null;
+        let timerInterval = null;
+
+        // Role Selection
+        function showDashboard(role) {
+            currentRole = role;
+            document.getElementById('loginScreen').style.display = 'none';
+            
+            if (role === 'admin') {
+                document.getElementById('adminSidebar').style.display = 'block';
+                document.getElementById('mainContent').style.display = 'block';
+                loadDashboard();
+                showPage('dashboard');
+            } else {
+                document.getElementById('studentSidebar').style.display = 'block';
+                document.getElementById('mainContent').style.display = 'block';
+                showPage('available-tests');
+            }
+        }
+
+        function logout() {
+            location.reload();
+        }
+
+        // Page Navigation
+        function showPage(pageId) {
+            document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+            document.getElementById('page-' + pageId).classList.add('active');
+            
+            // Update menu active state
+            if (currentRole === 'admin') {
+                document.querySelectorAll('#adminSidebar .menu-item').forEach(item => item.classList.remove('active'));
+            } else {
+                document.querySelectorAll('#studentSidebar .menu-item').forEach(item => item.classList.remove('active'));
+            }
+
+            // Load data based on page
+            if (pageId === 'dashboard') loadDashboard();
+            if (pageId === 'questions') loadQuestions();
+            if (pageId === 'submissions') loadSubmissions();
+            if (pageId === 'available-tests') loadAvailableTests();
+            if (pageId === 'my-submissions') loadMySubmissions();
+        }
+
+        // Dashboard
+        async function loadDashboard() {
+            const questionsResult = await window.api.getQuestions();
+            const questions = questionsResult.data || [];
+            
+            document.getElementById('totalQuestions').textContent = questions.length;
+            
+            let totalSubs = 0, passed = 0, failed = 0;
+            for (let q of questions) {
+                try {
+                    const result = await window.api.getSubmissionsByUser(1);
+                    const subs = result.data || [];
+                    totalSubs += subs.length;
+                    for (let s of subs) {
+                        if (s.status === 'PASSED') passed++;
+                        else if (s.status === 'FAILED') failed++;
+                    }
+                } catch(e) {}
+            }
+            
+            document.getElementById('totalSubmissions').textContent = totalSubs;
+            document.getElementById('passedSubmissions').textContent = passed;
+            document.getElementById('failedSubmissions').textContent = failed;
+        }
+
+        // Questions
+        async function loadQuestions() {
+            const result = await window.api.getQuestions();
+            const questions = result.data || [];
+            
+            const tbody = document.getElementById('questionsTableBody');
+            if (questions.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="5" style="text-align: center; color: #666;">No questions found</td></tr>';
+                return;
+            }
+            
+            tbody.innerHTML = questions.map(q => `
+                <tr>
+                    <td>${q.id}</td>
+                    <td>${q.title}</td>
+                    <td><span class="badge badge-${q.difficulty.toLowerCase()}">${q.difficulty}</span></td>
+                    <td>${q.testCaseCount || 0}</td>
+                    <td>
+                        <button class="btn btn-sm btn-primary" onclick="viewQuestion(${q.id})">View</button>
+                    </td>
+                </tr>
+            `).join('');
+        }
+
+        function viewQuestion(id) {
+            alert('Question ID: ' + id);
+        }
+
+        // Create Question
+        document.getElementById('questionForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            const formData = new FormData(e.target);
+            const testCases = [];
+            
+            const inputs = formData.getAll('tcInput[]');
+            const outputs = formData.getAll('tcOutput[]');
+            const hiddens = formData.getAll('tcHidden[]');
+            
+            for (let i = 0; i < inputs.length; i++) {
+                if (inputs[i]) {
+                    testCases.push({
+                        input: inputs[i],
+                        expectedOutput: outputs[i] || '',
+                        isHidden: hiddens[i] === 'on',
+                        isSample: i === 0
+                    });
+                }
+            }
+            
+            const data = {
+                title: formData.get('title'),
+                description: formData.get('description'),
+                difficulty: formData.get('difficulty'),
+                constraints: formData.get('constraints'),
+                sampleInput: formData.get('sampleInput'),
+                sampleOutput: formData.get('sampleOutput'),
+                timeLimit: parseInt(formData.get('timeLimit')),
+                testCases: testCases
+            };
+            
+            try {
+                const result = await window.api.createQuestion(data);
+                if (result.success) {
+                    alert('Question created successfully!');
+                    e.target.reset();
+                    showPage('questions');
+                } else {
+                    alert('Error: ' + result.message);
+                }
+            } catch(e) {
+                alert('Error creating question');
+            }
+        });
+
+        function addTestCase() {
+            const container = document.getElementById('testCasesContainer');
+            const div = document.createElement('div');
+            div.className = 'test-case-row';
+            div.innerHTML = `
+                <input type="text" name="tcInput[]" placeholder="Input">
+                <input type="text" name="tcOutput[]" placeholder="Expected Output">
+                <input type="checkbox" name="tcHidden[]"> Hidden
+                <button type="button" class="btn btn-danger btn-sm" onclick="this.parentElement.remove()">-</button>
+            `;
+            container.appendChild(div);
+        }
+
+        // Submissions
+        async function loadSubmissions() {
+            // For admin, show all submissions (mock)
+            const tbody = document.getElementById('submissionsTableBody');
+            tbody.innerHTML = '<tr><td colspan="6" style="text-align: center; color: #666;">No submissions yet</td></tr>';
+        }
+
+        // Available Tests (Student)
+        async function loadAvailableTests() {
+            const result = await window.api.getQuestions();
+            const questions = result.data || [];
+            
+            const tbody = document.getElementById('availableTestsBody');
+            if (questions.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="5" style="text-align: center; color: #666;">No tests available</td></tr>';
+                return;
+            }
+            
+            tbody.innerHTML = questions.map(q => `
+                <tr>
+                    <td>${q.id}</td>
+                    <td>${q.title}</td>
+                    <td><span class="badge badge-${q.difficulty.toLowerCase()}">${q.difficulty}</span></td>
+                    <td>${q.testCaseCount || 0}</td>
+                    <td><button class="btn btn-sm btn-success" onclick="startTest(${q.id})">Start Test</button></td>
+                </tr>
+            `).join('');
+        }
+
+        async function startTest(questionId) {
+            currentQuestionId = questionId;
+            const result = await window.api.getQuestion(questionId);
+            const question = result.data;
+            
+            if (!question) {
+                alert('Question not found');
+                return;
+            }
+            
+            document.getElementById('testQuestionTitle').textContent = question.title;
+            document.getElementById('qtTitle').textContent = question.title;
+            document.getElementById('qtDifficulty').textContent = question.difficulty;
+            document.getElementById('qtDifficulty').className = 'badge badge-' + question.difficulty.toLowerCase();
+            document.getElementById('qtDescription').textContent = question.description || '-';
+            document.getElementById('qtSampleInput').textContent = question.sampleInput || '-';
+            document.getElementById('qtSampleOutput').textContent = question.sampleOutput || '-';
+            document.getElementById('codeEditor').value = '';
+            document.getElementById('testResult').style.display = 'none';
+            
+            // Start timer
+            let timeLeft = (question.timeLimit || 1000) / 1000;
+            document.getElementById('testTimer').textContent = formatTime(timeLeft);
+            
+            if (timerInterval) clearInterval(timerInterval);
+            timerInterval = setInterval(() => {
+                timeLeft--;
+                document.getElementById('testTimer').textContent = formatTime(timeLeft);
+                if (timeLeft <= 0) {
+                    clearInterval(timerInterval);
+                    alert('Time up! Submitting automatically...');
+                    submitTest();
+                }
+            }, 1000);
+            
+            showPage('take-test');
+        }
+
+        function formatTime(seconds) {
+            const mins = Math.floor(seconds / 60);
+            const secs = seconds % 60;
+            return `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
+        }
+
+        async function submitTest() {
+            if (timerInterval) clearInterval(timerInterval);
+            
+            const code = document.getElementById('codeEditor').value;
+            if (!code.trim()) {
+                alert('Please write your code first');
+                return;
+            }
+            
+            const language = document.getElementById('languageSelect').value;
+            
+            const result = await window.api.createSubmission({
+                questionId: currentQuestionId,
+                language: language,
+                sourceCode: code
+            }, currentUserId);
+            
+            const resultDiv = document.getElementById('testResult');
+            resultDiv.style.display = 'block';
+            
+            if (result.data) {
+                const data = result.data;
+                const status = data.status;
+                const isSuccess = status === 'PASSED';
+                
+                resultDiv.innerHTML = `
+                    <div class="result-message ${isSuccess ? 'result-success' : 'result-failed'}">
+                        <h3>${status}</h3>
+                        <p>Score: ${data.score}%</p>
+                        <p>Passed: ${data.passedCount}/${data.totalCount} test cases</p>
+                        ${data.executionTime ? `<p>Execution Time: ${data.executionTime}ms</p>` : ''}
+                        ${data.errorMessage ? `<p>Error: ${data.errorMessage}</p>` : ''}
+                    </div>
+                `;
+            } else {
+                resultDiv.innerHTML = `<div class="result-message result-failed"><h3>Error</h3><p>${result.message}</p></div>`;
+            }
+        }
+
+        // My Submissions (Student)
+        async function loadMySubmissions() {
+            const result = await window.api.getSubmissionsByUser(currentUserId);
+            const submissions = result.data || [];
+            
+            const tbody = document.getElementById('mySubmissionsBody');
+            if (submissions.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="5" style="text-align: center; color: #666;">No submissions yet</td></tr>';
+                return;
+            }
+            
+            tbody.innerHTML = submissions.map(s => `
+                <tr>
+                    <td>${s.id}</td>
+                    <td>Question ${s.questionId}</td>
+                    <td><span class="badge badge-${s.status.toLowerCase()}">${s.status}</span></td>
+                    <td>${s.score}%</td>
+                    <td>${formatDate(s.createdAt)}</td>
+                </tr>
+            `).join('');
+        }
+
+        // Initialize
+        console.log('Assessment Platform loaded');
+    </script>
+</body>
+</html>
