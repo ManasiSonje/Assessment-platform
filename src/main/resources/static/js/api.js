@@ -1,5 +1,5 @@
 // API Configuration
-const API_BASE = 'http://localhost:8083/api/v1';
+const API_BASE = 'https://assessment-platform-production-fe53.up.railway.app/api/v1';
 
 function getAuthHeaders() {
     const token = localStorage.getItem('authToken');

@@ -139,7 +139,7 @@ const questions = [
 async function seedQuestions() {
     for (const q of questions) {
         try {
-            const res = await fetch('http://localhost:8081/api/v1/questions', {
+            const res = await fetch('https://assessment-platform-production-fe53.up.railway.app/api/v1/questions', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(q)
