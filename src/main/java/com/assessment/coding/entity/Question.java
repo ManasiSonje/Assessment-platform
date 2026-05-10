@@ -43,6 +43,10 @@ public class Question {
     @Builder.Default
     private List<TestCase> testCases = new ArrayList<>();
 
+    @ManyToMany(mappedBy = "questions")
+    @Builder.Default
+    private List<Test> tests = new ArrayList<>();
+
     @Column(name = "created_at")
     private Long createdAt;
 
@@ -67,5 +71,9 @@ public class Question {
 
     public void clearTestCases() {
         testCases.clear();
+    }
+
+    public void addTest(Test test) {
+        tests.add(test);
     }
 }

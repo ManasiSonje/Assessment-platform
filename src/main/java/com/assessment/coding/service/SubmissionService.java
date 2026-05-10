@@ -3,10 +3,9 @@ package com.assessment.coding.service;
 import com.assessment.coding.dto.*;
 import com.assessment.coding.entity.*;
 import com.assessment.coding.enums.SubmissionStatus;
-import com.assessment.coding.repository.QuestionRepository;
-import com.assessment.coding.repository.SubmissionRepository;
-import com.assessment.coding.repository.SubmissionResultRepository;
+import com.assessment.coding.repository.*;
 import com.assessment.coding.repository.TestCaseRepository;
+import com.assessment.coding.repository.TestSessionRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -26,15 +25,22 @@ public class SubmissionService {
     private final QuestionRepository questionRepository;
     private final TestCaseRepository testCaseRepository;
     private final CodeExecutionService executionService;
+    private final TestSessionRepository testSessionRepository;
 
     @Transactional
-    public SubmissionDetailResponseDTO createSubmission(SubmissionRequestDTO request, Long userId) {
+    public SubmissionDetailResponseDTO createSubmission(SubmissionRequestDTO request, Long userId, Long testSessionId) {
         Question question = questionRepository.findById(request.getQuestionId())
                 .orElseThrow(() -> new RuntimeException("Question not found with id: " + request.getQuestionId()));
+        
+        TestSession testSession = null;
+        if (testSessionId != null) {
+            testSession = testSessionRepository.findById(testSessionId).orElse(null);
+        }
 
         Submission submission = Submission.builder()
                 .userId(userId)
                 .question(question)
+                .testSession(testSession)
                 .language(request.getLanguage())
                 .sourceCode(request.getSourceCode())
                 .status(SubmissionStatus.PROCESSING)
@@ -68,13 +74,12 @@ public class SubmissionService {
             TestCase testCase = testCases.get(i);
             String testInput = testCase.getInput() != null ? testCase.getInput() : "";
             
-            // Prepend input reading to source code
-            String modifiedCode = prependInputCode(submission.getLanguage().name(), testInput, submission.getSourceCode());
-            
+            // Execute code with test input via stdin
+            // No code modification needed - Judge0 handles stdin
             CodeExecutionService.ExecutionResult execResult = executionService.executeCode(
-                    modifiedCode,
+                    submission.getSourceCode(),
                     submission.getLanguage().getValue(),
-                    ""
+                    testInput
             );
 
             String actualOutput = execResult.getOutput();
@@ -101,7 +106,7 @@ public class SubmissionService {
                 errorMessage.append("Test case ").append(i + 1).append(": ").append(execResult.getError()).append("; ");
             }
 
-            totalExecutionTime += execResult.getExecutionTime() != null ? execResult.getExecutionTime() : 0;
+            totalExecutionTime += execResult.getExecutionTime() != null ? execResult.getExecutionTime() : 0L;
         }
 
         for (SubmissionResult result : results) {
@@ -159,39 +164,15 @@ public class SubmissionService {
             return false;
         }
         
-        String actualTrimmed = actual.trim();
-        String expectedTrimmed = expected.trim();
+        // Normalize: trim, remove trailing whitespace, normalize line endings
+        String actualNormalized = actual.trim().replace("\r\n", "\n").replace("\r", "\n").replaceAll("\\s+$", "");
+        String expectedNormalized = expected.trim().replace("\r\n", "\n").replace("\r", "\n").replaceAll("\\s+$", "");
         
-        return actualTrimmed.equals(expectedTrimmed);
+        return actualNormalized.equals(expectedNormalized);
     }
     
     private String prependInputCode(String language, String input, String userCode) {
-        String escapedInput = input.replace("\\", "\\\\").replace("\"", "\\\"").replace("\n", " ").replace("\r", "");
-        
-        if ("PYTHON".equals(language)) {
-            return "input_data = '''" + input.replace("'''", "\\'\\'\\'") + "'''\n" + userCode;
-        }
-        
-        if ("JAVA".equals(language)) {
-            // If user didn't provide full class, wrap their code
-            if (!userCode.contains("class Main") && !userCode.contains("public class")) {
-                String userCodeIndented = userCode.replace("\n", "\n        ");
-                return "import java.util.*;\npublic class Main {\n    public static void main(String[] args) {\n        String input_data = \"" + escapedInput + "\";\n        " + userCodeIndented + "\n    }\n}";
-            }
-            // If user provided full class, inject input_data variable
-            return userCode.replace("String input_data = \"\";", "String input_data = \"" + escapedInput + "\";");
-        }
-        
-        if ("CPP".equals(language)) {
-            // If user didn't provide main, wrap their code
-            if (!userCode.contains("int main()")) {
-                String userCodeIndented = userCode.replace("\n", "\n    ");
-                return "#include <bits/stdc++.h>\nusing namespace std;\nint main() {\n    string input_data = \"" + escapedInput + "\";\n    " + userCodeIndented + "\n    return 0;\n}";
-            }
-            // If user provided main, inject input_data variable
-            return userCode.replace("string input_data = \"\";", "string input_data = \"" + escapedInput + "\";");
-        }
-        
+        // No modification needed - test input is sent via stdin to Judge0
         return userCode;
     }
 

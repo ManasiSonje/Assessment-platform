@@ -1,5 +1,32 @@
 // API Configuration
-const API_BASE = 'http://localhost:8080/api/v1';
+const API_BASE = 'http://localhost:8083/api/v1';
+
+function getAuthHeaders() {
+    const token = localStorage.getItem('authToken');
+    return {
+        'Content-Type': 'application/json',
+        ...(token ? { 'Authorization': `Bearer ${token}` } : {})
+    };
+}
+
+// Auth APIs
+async function register(data) {
+    const response = await fetch(`${API_BASE}/auth/register`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(data)
+    });
+    return response.json();
+}
+
+async function login(data) {
+    const response = await fetch(`${API_BASE}/auth/login`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(data)
+    });
+    return response.json();
+}
 
 // Question APIs
 async function getQuestions() {
@@ -15,17 +42,21 @@ async function getQuestion(id) {
 async function createQuestion(data) {
     const response = await fetch(`${API_BASE}/questions`, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: getAuthHeaders(),
         body: JSON.stringify(data)
     });
     return response.json();
 }
 
 // Submission APIs
-async function createSubmission(data, userId) {
-    const response = await fetch(`${API_BASE}/submissions?userId=${userId}`, {
+async function createSubmission(data, userId, testSessionId) {
+    let url = `${API_BASE}/submissions?userId=${userId}`;
+    if (testSessionId) {
+        url += `&testSessionId=${testSessionId}`;
+    }
+    const response = await fetch(url, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: getAuthHeaders(),
         body: JSON.stringify(data)
     });
     return response.json();
@@ -55,12 +86,91 @@ function formatDate(timestamp) {
     return new Date(timestamp).toLocaleString();
 }
 
+// Test APIs
+async function getTests() {
+    const response = await fetch(`${API_BASE}/tests`);
+    return response.json();
+}
+
+async function getTest(id) {
+    const response = await fetch(`${API_BASE}/tests/${id}`);
+    return response.json();
+}
+
+async function createTest(data) {
+    console.log('API createTest:', JSON.stringify(data));
+    const response = await fetch(`${API_BASE}/tests`, {
+        method: 'POST',
+        headers: getAuthHeaders(),
+        body: JSON.stringify(data)
+    });
+    const result = await response.json();
+    console.log('API result:', result);
+    return result;
+}
+
+async function startTest(data) {
+    const response = await fetch(`${API_BASE}/tests/start`, {
+        method: 'POST',
+        headers: getAuthHeaders(),
+        body: JSON.stringify(data)
+    });
+    return response.json();
+}
+
+async function getTestSession(id) {
+    const response = await fetch(`${API_BASE}/tests/session/${id}`);
+    return response.json();
+}
+
+async function submitTestSession(id) {
+    const response = await fetch(`${API_BASE}/tests/session/${id}/submit`, {
+        method: 'POST',
+        headers: getAuthHeaders()
+    });
+    return response.json();
+}
+
+// Admin APIs
+async function getDashboard() {
+    const response = await fetch(`${API_BASE}/admin/dashboard`, {
+        headers: getAuthHeaders()
+    });
+    return response.json();
+}
+
+async function getAdminTests() {
+    const response = await fetch(`${API_BASE}/admin/tests`, {
+        headers: getAuthHeaders()
+    });
+    return response.json();
+}
+
+async function getTestResults(testId) {
+    const response = await fetch(`${API_BASE}/admin/test/${testId}/results`, {
+        headers: getAuthHeaders()
+    });
+    return response.json();
+}
+
 // Make functions globally available
 window.api = {
+    register,
+    login,
     getQuestions,
     getQuestion,
     createQuestion,
     createSubmission,
     getSubmission,
-    getSubmissionsByUser
+    getSubmissionsByUser,
+    getTests,
+    getTest,
+    createTest,
+    startTest,
+    getTestSession,
+    submitTest: submitTestSession,
+    submitTestSession,
+    getDashboard,
+    getAdminTests,
+    getTestResults
 };

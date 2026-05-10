@@ -20,8 +20,9 @@ public class SubmissionController {
     @PostMapping
     public ResponseEntity<ApiResponse<SubmissionDetailResponseDTO>> createSubmission(
             @Valid @RequestBody SubmissionRequestDTO request,
-            @RequestParam(defaultValue = "1") Long userId) {
-        SubmissionDetailResponseDTO response = submissionService.createSubmission(request, userId);
+            @RequestParam(defaultValue = "1") Long userId,
+            @RequestParam(required = false) Long testSessionId) {
+        SubmissionDetailResponseDTO response = submissionService.createSubmission(request, userId, testSessionId);
         return ResponseEntity.status(HttpStatus.CREATED)
                 .body(ApiResponse.success("Submission created and evaluated", response));
     }

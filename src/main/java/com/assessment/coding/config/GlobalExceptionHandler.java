@@ -30,12 +30,4 @@ public class GlobalExceptionHandler {
         return ResponseEntity.status(HttpStatus.BAD_REQUEST)
                 .body(ApiResponse.error(message));
     }
-    
-    @ExceptionHandler(Exception.class)
-    public ResponseEntity<ApiResponse<Object>> handleGenericException(Exception ex) {
-        log.error("Unexpected exception: ", ex);
-        // Don't expose internal errors to client
-        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                .body(ApiResponse.error("An error occurred"));
-    }
 }

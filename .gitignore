@@ -47,3 +47,7 @@ Thumbs.db
 ### Local config ###
 application-local.yml
 maven-settings.xml
+
+### OS ###
+run.bat
+nul

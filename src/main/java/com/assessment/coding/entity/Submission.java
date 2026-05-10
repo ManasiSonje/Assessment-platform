@@ -28,6 +28,10 @@ public class Submission {
     @JoinColumn(name = "question_id", nullable = false)
     private Question question;
 
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "test_session_id")
+    private TestSession testSession;
+
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
     private Language language;
