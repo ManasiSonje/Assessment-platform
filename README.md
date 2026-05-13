@@ -110,6 +110,34 @@ mvn spring-boot:run
 http://localhost:8083
 ```
 
+## 📋 Questions Available
+
+**26 DSA Questions** from LeetCode covering Easy to Hard difficulty:
+
+| # | Title | Difficulty | # | Title | Difficulty |
+|---|-------|------------|---|-------|------------|
+| 1 | Two Sum | Easy | 14 | Merge Intervals | Medium |
+| 2 | Valid Palindrome | Easy | 15 | Longest Palindromic Substring | Medium |
+| 3 | Reverse String | Easy | 16 | Group Anagrams | Medium |
+| 4 | Longest Substring Without Repeating Characters | Medium | 17 | Product of Array Except Self | Medium |
+| 5 | Container With Most Water | Medium | 18 | Trapping Rain Water | Hard |
+| 6 | Maximum Subarray | Medium | 19 | Find the Duplicate Number | Medium |
+| 7 | Climbing Stairs | Easy | 20 | Maximum Depth of Binary Tree | Easy |
+| 8 | 3Sum | Medium | 21 | Rotate Array | Medium |
+| 9 | Merge Two Sorted Lists | Easy | 22 | Coin Change | Medium |
+| 10 | Valid Anagram | Easy | 23 | Longest Consecutive Sequence | Medium |
+| 11 | Best Time to Buy and Sell Stock | Easy | 24 | First Missing Positive | Hard |
+| 12 | Valid Parentheses | Easy | | | |
+| 13 | Reverse Linked List | Easy | **Total** | **24 + 2 existing** | |
+
+## 📝 Tests Available
+
+| Test | Duration | Questions | Access Code |
+|------|----------|-----------|-------------|
+| DSA Fundamentals | 120 min | Two Sum, Valid Palindrome, Reverse String, Climbing Stairs, Merge Two Sorted Lists | `B1B21D4F` |
+| Medium Level DSA | 90 min | Longest Substring, Container With Most Water, Maximum Subarray, 3Sum | `E3133477` |
+| Advanced Challenges | 60 min | Subarray, Coin Change, First Missing Positive | `78815D66` |
+
 ## 🔌 API Endpoints
 
 ### Authentication
