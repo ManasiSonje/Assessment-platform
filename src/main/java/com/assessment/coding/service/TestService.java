@@ -15,6 +15,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
+import java.util.Collections;
 import java.util.List;
 import java.util.UUID;
 import java.util.stream.Collectors;
@@ -57,6 +58,40 @@ public class TestService {
         return testRepository.findAll().stream()
                 .map(this::mapToDTO)
                 .collect(Collectors.toList());
+    }
+
+    @Transactional
+    public TestResponseDTO updateTest(Long id, TestRequestDTO request) {
+        Test test = testRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Test not found"));
+
+        test.setTitle(request.getTitle());
+        test.setDescription(request.getDescription());
+        test.setDuration(request.getDuration() != null ? request.getDuration() : test.getDuration());
+        test.setIsActive(request.getIsActive() != null ? request.getIsActive() : test.getIsActive());
+        if (request.getTestType() != null) {
+            test.setTestType(request.getTestType());
+        }
+
+        if (request.getQuestionIds() != null) {
+            for (Question q : test.getQuestions()) {
+                q.getTests().remove(test);
+            }
+            test.getQuestions().clear();
+
+            List<Question> newQuestions = questionRepository.findAllById(request.getQuestionIds());
+            newQuestions.forEach(test::addQuestion);
+        }
+
+        test = testRepository.save(test);
+        return mapToDTO(test);
+    }
+
+    @Transactional
+    public void deleteTest(Long id) {
+        Test test = testRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Test not found"));
+        testRepository.delete(test);
     }
 
     public List<TestResponseDTO> getActiveTests() {
@@ -142,6 +177,9 @@ public class TestService {
                 .testType(test.getTestType())
                 .isActive(test.getIsActive())
                 .questionCount(test.getQuestions() != null ? test.getQuestions().size() : 0)
+                .questionIds(test.getQuestions() != null ?
+                        test.getQuestions().stream().map(Question::getId).collect(Collectors.toList()) :
+                        Collections.emptyList())
                 .createdAt(test.getCreatedAt() != null ? test.getCreatedAt().toString() : null)
                 .build();
     }

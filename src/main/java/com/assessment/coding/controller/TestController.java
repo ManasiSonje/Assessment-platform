@@ -51,6 +51,30 @@ public class TestController {
         }
     }
 
+    @PutMapping("/{id}")
+    public ResponseEntity<ApiResponse<TestResponseDTO>> updateTest(
+            @PathVariable Long id,
+            @RequestBody TestRequestDTO request) {
+        try {
+            TestResponseDTO test = testService.updateTest(id, request);
+            return ResponseEntity.ok(ApiResponse.success("Test updated successfully", test));
+        } catch (Exception e) {
+            return ResponseEntity.badRequest()
+                    .body(ApiResponse.error(e.getMessage()));
+        }
+    }
+
+    @DeleteMapping("/{id}")
+    public ResponseEntity<ApiResponse<Void>> deleteTest(@PathVariable Long id) {
+        try {
+            testService.deleteTest(id);
+            return ResponseEntity.ok(ApiResponse.success("Test deleted successfully", null));
+        } catch (Exception e) {
+            return ResponseEntity.badRequest()
+                    .body(ApiResponse.error(e.getMessage()));
+        }
+    }
+
     @PostMapping("/start")
     public ResponseEntity<ApiResponse<TestSessionResponseDTO>> startTest(@RequestBody TestStartRequestDTO request) {
         try {

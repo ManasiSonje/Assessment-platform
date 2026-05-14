@@ -5,6 +5,8 @@ import com.assessment.coding.enums.TestType;
 import lombok.Builder;
 import lombok.Data;
 
+import java.util.List;
+
 @Data
 @Builder
 public class TestResponseDTO {
@@ -16,5 +18,6 @@ public class TestResponseDTO {
     private TestType testType;
     private Boolean isActive;
     private Integer questionCount;
+    private List<Long> questionIds;
     private String createdAt;
 }

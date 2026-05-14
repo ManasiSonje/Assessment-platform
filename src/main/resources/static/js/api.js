@@ -39,6 +39,23 @@ async function getQuestion(id) {
     return response.json();
 }
 
+async function updateQuestion(id, data) {
+    const response = await fetch(`${API_BASE}/questions/${id}`, {
+        method: 'PUT',
+        headers: getAuthHeaders(),
+        body: JSON.stringify(data)
+    });
+    return response.json();
+}
+
+async function deleteQuestion(id) {
+    const response = await fetch(`${API_BASE}/questions/${id}`, {
+        method: 'DELETE',
+        headers: getAuthHeaders()
+    });
+    return response.json();
+}
+
 async function createQuestion(data) {
     const response = await fetch(`${API_BASE}/questions`, {
         method: 'POST',
@@ -94,6 +111,23 @@ async function getTests() {
 
 async function getTest(id) {
     const response = await fetch(`${API_BASE}/tests/${id}`);
+    return response.json();
+}
+
+async function updateTest(id, data) {
+    const response = await fetch(`${API_BASE}/tests/${id}`, {
+        method: 'PUT',
+        headers: getAuthHeaders(),
+        body: JSON.stringify(data)
+    });
+    return response.json();
+}
+
+async function deleteTest(id) {
+    const response = await fetch(`${API_BASE}/tests/${id}`, {
+        method: 'DELETE',
+        headers: getAuthHeaders()
+    });
     return response.json();
 }
 
@@ -160,12 +194,16 @@ window.api = {
     getQuestions,
     getQuestion,
     createQuestion,
+    updateQuestion,
+    deleteQuestion,
     createSubmission,
     getSubmission,
     getSubmissionsByUser,
     getTests,
     getTest,
     createTest,
+    updateTest,
+    deleteTest,
     startTest,
     getTestSession,
     submitTest: submitTestSession,

@@ -3,6 +3,7 @@ package com.assessment.coding.service;
 import com.assessment.coding.dto.*;
 import com.assessment.coding.entity.Question;
 import com.assessment.coding.entity.TestCase;
+import com.assessment.coding.entity.Test;
 import com.assessment.coding.enums.Difficulty;
 import com.assessment.coding.repository.QuestionRepository;
 import lombok.RequiredArgsConstructor;
@@ -58,6 +59,49 @@ public class QuestionService {
         Question question = questionRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Question not found with id: " + id));
         return mapToDetailResponseDTO(question);
+    }
+
+    @Transactional
+    public QuestionResponseDTO updateQuestion(Long id, QuestionRequestDTO request) {
+        Question question = questionRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Question not found with id: " + id));
+
+        question.setTitle(request.getTitle());
+        question.setDescription(request.getDescription());
+        question.setDifficulty(request.getDifficulty());
+        question.setConstraints(request.getConstraints());
+        question.setSampleInput(request.getSampleInput());
+        question.setSampleOutput(request.getSampleOutput());
+        question.setTimeLimit(request.getTimeLimit());
+
+        question.clearTestCases();
+        if (request.getTestCases() != null) {
+            for (TestCaseRequestDTO testCaseDTO : request.getTestCases()) {
+                TestCase testCase = TestCase.builder()
+                        .input(testCaseDTO.getInput())
+                        .expectedOutput(testCaseDTO.getExpectedOutput())
+                        .isHidden(testCaseDTO.getIsHidden() != null ? testCaseDTO.getIsHidden() : false)
+                        .isSample(testCaseDTO.getIsSample() != null ? testCaseDTO.getIsSample() : false)
+                        .build();
+                question.addTestCase(testCase);
+            }
+        }
+
+        Question saved = questionRepository.save(question);
+        return mapToResponseDTO(saved);
+    }
+
+    @Transactional
+    public void deleteQuestion(Long id) {
+        Question question = questionRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Question not found with id: " + id));
+
+        for (Test test : question.getTests()) {
+            test.getQuestions().remove(question);
+        }
+        question.getTests().clear();
+
+        questionRepository.delete(question);
     }
 
     @Transactional(readOnly = true)

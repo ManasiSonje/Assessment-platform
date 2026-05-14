@@ -848,6 +848,9 @@
                             Loading questions...
                         </div>
                     </div>
+                    <div class="form-group">
+                        <label><input type="checkbox" id="testIsActive" checked> Active</label>
+                    </div>
                     <button type="submit" class="btn btn-primary">Create Test</button>
                 </form>
             </div>
@@ -1024,6 +1027,8 @@
         let timeLeft = 0;
         let activeTab = 'dashboard';
         let currentTestSessionId = null;
+        let editingQuestionId = null;
+        let editingTestId = null;
 
         function initPage() {
             var authScreen = document.getElementById('authScreen');
@@ -1221,10 +1226,21 @@
             if (pageId === 'submissions') loadSubmissions();
             if (pageId === 'available-tests') loadAvailableTests();
             if (pageId === 'my-submissions') loadMySubmissions();
-            if (pageId === 'create-question') loadQuestions();
+            if (pageId === 'create-question') {
+                loadQuestions();
+                if (!editingQuestionId) {
+                    document.querySelector('#page-create-question h1').textContent = 'Upload Question';
+                    document.getElementById('questionForm').querySelector('button[type="submit"]').textContent = 'Create Question';
+                }
+            }
             if (pageId === 'create-test') {
                 loadQuestionsForTest();
                 loadExistingTests();
+                if (!editingTestId) {
+                    document.querySelector('#page-create-test h1').textContent = 'Create New Test';
+                    document.getElementById('testForm').querySelector('button[type="submit"]').textContent = 'Create Test';
+                    document.getElementById('testIsActive').checked = true;
+                }
             }
         }
         
@@ -1322,6 +1338,8 @@ function stopPageRefresh() {
                     <td>${q.testCaseCount || 0}</td>
                     <td>
                         <button class="btn btn-sm btn-primary" onclick="viewQuestion(${q.id})">View</button>
+                        <button class="btn btn-sm btn-secondary" onclick="editQuestion(${q.id})">Edit</button>
+                        <button class="btn btn-sm btn-danger" onclick="deleteQuestion(${q.id})">Delete</button>
                     </td>
                 </tr>
             `).join('');
@@ -1329,6 +1347,74 @@ function stopPageRefresh() {
 
         function viewQuestion(id) {
             alert('Question ID: ' + id);
+        }
+
+        async function editQuestion(id) {
+            try {
+                const result = await window.api.getQuestion(id);
+                const q = result.data;
+                if (!q) {
+                    alert('Question not found');
+                    return;
+                }
+
+                editingQuestionId = id;
+
+                const form = document.getElementById('questionForm');
+                form.querySelector('[name="title"]').value = q.title || '';
+                form.querySelector('[name="description"]').value = q.description || '';
+                form.querySelector('[name="difficulty"]').value = q.difficulty || '';
+                form.querySelector('[name="constraints"]').value = q.constraints || '';
+                form.querySelector('[name="sampleInput"]').value = q.sampleInput || '';
+                form.querySelector('[name="sampleOutput"]').value = q.sampleOutput || '';
+                form.querySelector('[name="timeLimit"]').value = q.timeLimit || 1000;
+
+                const container = document.getElementById('testCasesContainer');
+                container.innerHTML = '';
+                if (q.testCases && q.testCases.length > 0) {
+                    q.testCases.forEach(tc => {
+                        const div = document.createElement('div');
+                        div.className = 'test-case-row';
+                        div.innerHTML = `
+                            <input type="text" name="tcInput[]" placeholder="Input" value="${escapeHtml(tc.input || '')}">
+                            <input type="text" name="tcOutput[]" placeholder="Expected Output" value="${escapeHtml(tc.expectedOutput || '')}">
+                            <input type="checkbox" name="tcHidden[]" ${tc.isHidden ? 'checked' : ''}> Hidden
+                            <button type="button" class="btn btn-danger btn-sm" onclick="this.parentElement.remove()">-</button>
+                        `;
+                        container.appendChild(div);
+                    });
+                } else {
+                    addTestCase();
+                }
+
+                document.querySelector('#page-create-question h1').textContent = 'Edit Question';
+                form.querySelector('button[type="submit"]').textContent = 'Update Question';
+
+                showPage('create-question');
+            } catch(e) {
+                alert('Error loading question: ' + e.message);
+            }
+        }
+
+        async function deleteQuestion(id) {
+            if (!confirm('Are you sure you want to delete this question?')) return;
+            try {
+                const result = await window.api.deleteQuestion(id);
+                if (result.success) {
+                    alert('Question deleted successfully');
+                    loadQuestions();
+                } else {
+                    alert('Error: ' + result.message);
+                }
+            } catch(e) {
+                alert('Error deleting question: ' + e.message);
+            }
+        }
+
+        function escapeHtml(str) {
+            const div = document.createElement('div');
+            div.textContent = str;
+            return div.innerHTML;
         }
 
         // Load questions for test creation
@@ -1353,14 +1439,67 @@ function stopPageRefresh() {
                     document.getElementById('existingTestsList').innerHTML = 'No tests created yet';
                     return;
                 }
-                document.getElementById('existingTestsList').innerHTML = '<table style="width:100%"><thead><tr><th>ID</th><th>Title</th><th>Questions</th><th>Duration</th><th>Access Code</th><th>Status</th><th>Results</th></tr></thead><tbody>' + 
-                    tests.map(t => '<tr><td>' + t.id + '</td><td>' + t.title + '</td><td>' + (t.questionCount || 0) + '</td><td>' + t.duration + ' min</td><td><strong>' + t.accessCode + '</strong></td><td>' + (t.isActive ? 'Active' : 'Inactive') + '</td><td><button class="btn btn-secondary" onclick="viewTestResults(' + t.id + ')">View</button></td></tr>').join('') +
+                document.getElementById('existingTestsList').innerHTML = '<table style="width:100%"><thead><tr><th>ID</th><th>Title</th><th>Questions</th><th>Duration</th><th>Access Code</th><th>Status</th><th>Actions</th></tr></thead><tbody>' + 
+                    tests.map(t => '<tr><td>' + t.id + '</td><td>' + t.title + '</td><td>' + (t.questionCount || 0) + '</td><td>' + t.duration + ' min</td><td><strong>' + t.accessCode + '</strong></td><td>' + (t.isActive ? 'Active' : 'Inactive') + '</td><td><button class="btn btn-sm btn-secondary" onclick="viewTestResults(' + t.id + ')">Results</button> <button class="btn btn-sm btn-primary" onclick="editTest(' + t.id + ')">Edit</button> <button class="btn btn-sm btn-danger" onclick="deleteTest(' + t.id + ')">Delete</button></td></tr>').join('') +
                     '</tbody></table>';
             } catch(e) {
                 document.getElementById('existingTestsList').innerHTML = 'Error loading tests: ' + e.message;
             }
         }
         
+        async function editTest(id) {
+            try {
+                const result = await window.api.getTest(id);
+                const t = result.data;
+                if (!t) {
+                    alert('Test not found');
+                    return;
+                }
+
+                editingTestId = id;
+
+                const form = document.getElementById('testForm');
+                form.querySelector('[name="testTitle"]').value = t.title || '';
+                form.querySelector('[name="testDesc"]').value = t.description || '';
+                form.querySelector('[name="testDuration"]').value = t.duration || 60;
+
+                const cb = document.getElementById('testIsActive');
+                if (cb) cb.checked = t.isActive !== false;
+
+                const checkboxes = document.querySelectorAll('input[name="questionIds"]');
+                checkboxes.forEach(c => c.checked = false);
+                if (t.questionIds && t.questionIds.length > 0) {
+                    checkboxes.forEach(c => {
+                        if (t.questionIds.includes(parseInt(c.value))) {
+                            c.checked = true;
+                        }
+                    });
+                }
+
+                document.querySelector('#page-create-test h1').textContent = 'Edit Test';
+                form.querySelector('button[type="submit"]').textContent = 'Update Test';
+
+                showPage('create-test');
+            } catch(e) {
+                alert('Error loading test: ' + e.message);
+            }
+        }
+
+        async function deleteTest(id) {
+            if (!confirm('Are you sure you want to delete this test?')) return;
+            try {
+                const result = await window.api.deleteTest(id);
+                if (result.success) {
+                    alert('Test deleted successfully');
+                    loadExistingTests();
+                } else {
+                    alert('Error: ' + result.message);
+                }
+            } catch(e) {
+                alert('Error deleting test: ' + e.message);
+            }
+        }
+
         async function viewTestResults(testId) {
             try {
                 const result = await window.api.getTestResults(testId);
@@ -1384,7 +1523,7 @@ function stopPageRefresh() {
             }
         }
 
-        // Create Question
+        // Create / Update Question
         document.getElementById('questionForm').addEventListener('submit', async function(e) {
             e.preventDefault();
             
@@ -1418,20 +1557,28 @@ function stopPageRefresh() {
             };
             
             try {
-                const result = await window.api.createQuestion(data);
+                let result;
+                if (editingQuestionId) {
+                    result = await window.api.updateQuestion(editingQuestionId, data);
+                } else {
+                    result = await window.api.createQuestion(data);
+                }
                 if (result.success) {
-                    alert('Question created successfully!');
+                    alert(editingQuestionId ? 'Question updated successfully!' : 'Question created successfully!');
+                    editingQuestionId = null;
                     e.target.reset();
+                    document.querySelector('#page-create-question h1').textContent = 'Upload Question';
+                    e.target.querySelector('button[type="submit"]').textContent = 'Create Question';
                     showPage('questions');
                 } else {
                     alert('Error: ' + result.message);
                 }
             } catch(e) {
-                alert('Error creating question');
+                alert('Error saving question');
             }
         });
 
-        // Create Test
+        // Create / Update Test
         document.getElementById('testForm').addEventListener('submit', async function(e) {
             e.preventDefault();
             
@@ -1443,28 +1590,40 @@ function stopPageRefresh() {
                 return;
             }
             
+            const isActive = document.getElementById('testIsActive').checked;
+            
             const data = {
                 title: formData.get('testTitle'),
                 description: formData.get('testDesc'),
                 duration: parseInt(formData.get('testDuration')),
+                isActive: isActive,
                 questionIds: selectedQuestions
             };
             
-            console.log('Creating test with:', JSON.stringify(data));
+            console.log('Saving test with:', JSON.stringify(data));
             
             try {
-                const result = await window.api.createTest(data);
+                let result;
+                if (editingTestId) {
+                    result = await window.api.updateTest(editingTestId, data);
+                } else {
+                    result = await window.api.createTest(data);
+                }
                 console.log('Result:', result);
                 if (result.success) {
-                    alert('Test created successfully! Access Code: ' + result.data.accessCode);
+                    alert(editingTestId ? 'Test updated successfully!' : 'Test created successfully! Access Code: ' + result.data.accessCode);
+                    editingTestId = null;
                     e.target.reset();
+                    document.getElementById('testIsActive').checked = true;
+                    document.querySelector('#page-create-test h1').textContent = 'Create New Test';
+                    e.target.querySelector('button[type="submit"]').textContent = 'Create Test';
                     showPage('dashboard');
                 } else {
                     alert('Error: ' + result.message);
                 }
             } catch(e) {
                 console.error('Error:', e);
-                alert('Error creating test: ' + e.message);
+                alert('Error saving test: ' + e.message);
             }
         });
 

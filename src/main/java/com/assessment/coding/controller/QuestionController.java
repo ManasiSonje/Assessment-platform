@@ -36,4 +36,18 @@ public class QuestionController {
         QuestionDetailResponseDTO response = questionService.getQuestionById(id);
         return ResponseEntity.ok(ApiResponse.success(response));
     }
+
+    @PutMapping("/{id}")
+    public ResponseEntity<ApiResponse<QuestionResponseDTO>> updateQuestion(
+            @PathVariable Long id,
+            @Valid @RequestBody QuestionRequestDTO request) {
+        QuestionResponseDTO response = questionService.updateQuestion(id, request);
+        return ResponseEntity.ok(ApiResponse.success("Question updated successfully", response));
+    }
+
+    @DeleteMapping("/{id}")
+    public ResponseEntity<ApiResponse<Void>> deleteQuestion(@PathVariable Long id) {
+        questionService.deleteQuestion(id);
+        return ResponseEntity.ok(ApiResponse.success("Question deleted successfully", null));
+    }
 }
