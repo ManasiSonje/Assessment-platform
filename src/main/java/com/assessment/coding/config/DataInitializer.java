@@ -1,17 +1,22 @@
 package com.assessment.coding.config;
 
 import com.assessment.coding.entity.Question;
+import com.assessment.coding.entity.Test;
 import com.assessment.coding.entity.TestCase;
 import com.assessment.coding.entity.User;
 import com.assessment.coding.enums.Difficulty;
+import com.assessment.coding.enums.TestType;
 import com.assessment.coding.repository.QuestionRepository;
 import com.assessment.coding.repository.TestCaseRepository;
+import com.assessment.coding.repository.TestRepository;
 import com.assessment.coding.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
+
+import java.util.List;
 
 @Component
 @RequiredArgsConstructor
@@ -20,6 +25,7 @@ public class DataInitializer implements CommandLineRunner {
 
     private final QuestionRepository questionRepository;
     private final TestCaseRepository testCaseRepository;
+    private final TestRepository testRepository;
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
 
@@ -348,11 +354,241 @@ public class DataInitializer implements CommandLineRunner {
         saveTestCase(q43, "search:hello", "0", true);
         saveTestCase(q43, "insert:test,search:test,search:testing,prefix:te", "1 0 1", true);
 
-        // 44. Longest Palindromic Substring (duplicate check, adding Number of Islands instead... already added)
-        // Skip - already have 43 questions from 4 extra
-        // Actually let me add a few more to fill out
+        // 44. Add Two Numbers
+        Question q44 = saveQuestion("Add Two Numbers", "You are given two non-empty linked lists representing two non-negative integers. The digits are stored in reverse order. Add the two numbers and return the sum as a linked list.", Difficulty.MEDIUM, "2 4 3\n5 6 4", "7 0 8");
+        saveTestCase(q44, "2 4 3\n5 6 4", "7 0 8", false);
+        saveTestCase(q44, "0\n0", "0", false);
+        saveTestCase(q44, "9 9 9 9 9 9 9\n9 9 9 9", "8 9 9 9 0 0 0 1", true);
+
+        // 45. Longest Common Prefix
+        Question q45 = saveQuestion("Longest Common Prefix", "Write a function to find the longest common prefix string amongst an array of strings.", Difficulty.EASY, "flower,flow,flight", "fl");
+        saveTestCase(q45, "flower,flow,flight", "fl", false);
+        saveTestCase(q45, "dog,racecar,car", "", false);
+        saveTestCase(q45, "apple,apricot,april", "ap", true);
+
+        // 46. Roman to Integer
+        Question q46 = saveQuestion("Roman to Integer", "Given a roman numeral, convert it to an integer.", Difficulty.EASY, "III", "3");
+        saveTestCase(q46, "III", "3", false);
+        saveTestCase(q46, "LVIII", "58", false);
+        saveTestCase(q46, "MCMXCIV", "1994", true);
+
+        // 47. Merge Sorted Array
+        Question q47 = saveQuestion("Merge Sorted Array", "Given two sorted arrays, merge them into one sorted array.", Difficulty.EASY, "1 2 3 0 0 0\n2 5 6", "1 2 2 3 5 6");
+        saveTestCase(q47, "1 2 3 0 0 0\n2 5 6", "1 2 2 3 5 6", false);
+        saveTestCase(q47, "1\n", "1", false);
+        saveTestCase(q47, "0\n1", "1", true);
+
+        // 48. Single Number
+        Question q48 = saveQuestion("Single Number", "Given an array, every element appears twice except one. Find that single one.", Difficulty.EASY, "2 2 1", "1");
+        saveTestCase(q48, "2 2 1", "1", false);
+        saveTestCase(q48, "4 1 2 1 2", "4", false);
+        saveTestCase(q48, "5 5 3 3 7 7 9", "9", true);
+
+        // 49. Majority Element
+        Question q49 = saveQuestion("Majority Element", "Return the majority element that appears more than ⌊n/2⌋ times.", Difficulty.EASY, "3 2 3", "3");
+        saveTestCase(q49, "3 2 3", "3", false);
+        saveTestCase(q49, "2 2 1 1 1 2 2", "2", false);
+        saveTestCase(q49, "6 5 5", "5", true);
+
+        // 50. Happy Number
+        Question q50 = saveQuestion("Happy Number", "Determine if a number is happy (repeated sum of squares of digits ends in 1).", Difficulty.EASY, "19", "true");
+        saveTestCase(q50, "19", "true", false);
+        saveTestCase(q50, "2", "false", false);
+        saveTestCase(q50, "7", "true", true);
+
+        // 51. Remove Duplicates from Sorted Array
+        Question q51 = saveQuestion("Remove Duplicates from Sorted Array", "Remove duplicates from sorted array in-place and return the count of unique elements.", Difficulty.EASY, "1 1 2", "2\n1 2");
+        saveTestCase(q51, "1 1 2", "2\n1 2", false);
+        saveTestCase(q51, "0 0 1 1 1 2 2 3 3 4", "5\n0 1 2 3 4", false);
+        saveTestCase(q51, "", "0", true);
+
+        // 52. Plus One
+        Question q52 = saveQuestion("Plus One", "Increment a large integer represented as an array by one.", Difficulty.EASY, "1 2 3", "1 2 4");
+        saveTestCase(q52, "1 2 3", "1 2 4", false);
+        saveTestCase(q52, "9", "1 0", false);
+        saveTestCase(q52, "9 9 9", "1 0 0 0", true);
+
+        // 53. Pascal Triangle
+        Question q53 = saveQuestion("Pascal Triangle", "Return the first numRows of Pascal triangle.", Difficulty.EASY, "5", "1\n1 1\n1 2 1\n1 3 3 1\n1 4 6 4 1");
+        saveTestCase(q53, "5", "1\n1 1\n1 2 1\n1 3 3 1\n1 4 6 4 1", false);
+        saveTestCase(q53, "1", "1", false);
+        saveTestCase(q53, "3", "1\n1 1\n1 2 1", true);
+
+        // 54. Valid Sudoku
+        Question q54 = saveQuestion("Valid Sudoku", "Determine if a 9x9 Sudoku board is valid.", Difficulty.MEDIUM, "53..7....;6..195...;.98....6.;8...6...3;4..8.3..1;7...2...6;.6....28.;...419..5;....8..79", "true");
+        saveTestCase(q54, "53..7....;6..195...;.98....6.;8...6...3;4..8.3..1;7...2...6;.6....28.;...419..5;....8..79", "true", false);
+        saveTestCase(q54, "83..7....;6..195...;.98....6.;8...6...3;4..8.3..1;7...2...6;.6....28.;...419..5;....8..79", "false", false);
+        saveTestCase(q54, "53..7....;6..195...;.98....6.;8...6...3;4..8.3..1;7...2...6;.6....28.;...419..5;....8..79", "true", true);
+
+        // 55. Search in Rotated Sorted Array
+        Question q55 = saveQuestion("Search in Rotated Sorted Array", "Search for a target in a rotated sorted array. Return index or -1.", Difficulty.MEDIUM, "4 5 6 7 0 1 2\n0", "4");
+        saveTestCase(q55, "4 5 6 7 0 1 2\n0", "4", false);
+        saveTestCase(q55, "4 5 6 7 0 1 2\n3", "-1", false);
+        saveTestCase(q55, "3 1\n1", "1", true);
+
+        // 56. Generate Parentheses
+        Question q56 = saveQuestion("Generate Parentheses", "Generate all combinations of well-formed parentheses for n pairs.", Difficulty.MEDIUM, "3", "((())) (()()) (())() ()(()) ()()()");
+        saveTestCase(q56, "3", "((())) (()()) (())() ()(()) ()()()", false);
+        saveTestCase(q56, "1", "()", false);
+        saveTestCase(q56, "2", "(()) ()()", true);
+
+        // 57. Unique Paths
+        Question q57 = saveQuestion("Unique Paths", "A robot on an m x n grid. Count unique paths to bottom-right corner (only down/right moves).", Difficulty.MEDIUM, "3 7", "28");
+        saveTestCase(q57, "3 7", "28", false);
+        saveTestCase(q57, "3 2", "3", false);
+        saveTestCase(q57, "3 3", "6", true);
+
+        // 58. Sort Colors
+        Question q58 = saveQuestion("Sort Colors", "Sort an array of 0s, 1s, and 2s in-place (Dutch national flag problem).", Difficulty.MEDIUM, "2 0 2 1 1 0", "0 0 1 1 2 2");
+        saveTestCase(q58, "2 0 2 1 1 0", "0 0 1 1 2 2", false);
+        saveTestCase(q58, "2 0 1", "0 1 2", false);
+        saveTestCase(q58, "1 2 0 2 1 0 1", "0 0 1 1 1 2 2", true);
+
+        // 59. Binary Tree Level Order Traversal
+        Question q59 = saveQuestion("Binary Tree Level Order Traversal", "Return level order traversal of a binary tree (each level on a separate line).", Difficulty.MEDIUM, "3 9 20 null null 15 7", "3\n9 20\n15 7");
+        saveTestCase(q59, "3 9 20 null null 15 7", "3\n9 20\n15 7", false);
+        saveTestCase(q59, "1", "1", false);
+        saveTestCase(q59, "1 2 3 4 5", "1\n2 3\n4 5", true);
+
+        // 60. Symmetric Tree
+        Question q60 = saveQuestion("Symmetric Tree", "Check whether a binary tree is a mirror of itself (symmetric).", Difficulty.EASY, "1 2 2 3 4 4 3", "true");
+        saveTestCase(q60, "1 2 2 3 4 4 3", "true", false);
+        saveTestCase(q60, "1 2 2 null 3 null 3", "false", false);
+        saveTestCase(q60, "1", "true", true);
+
+        // 61. Path Sum
+        Question q61 = saveQuestion("Path Sum", "Return true if the tree has a root-to-leaf path summing to target.", Difficulty.EASY, "5 4 8 11 null 13 4 7 2 null null null 1\n22", "true");
+        saveTestCase(q61, "5 4 8 11 null 13 4 7 2 null null null 1\n22", "true", false);
+        saveTestCase(q61, "1 2 3\n5", "false", false);
+        saveTestCase(q61, "1\n1", "true", true);
+
+        // 62. Best Time to Buy and Sell Stock II
+        Question q62 = saveQuestion("Best Time to Buy and Sell Stock II", "You may buy/sell multiple times to maximize profit (at most one share at a time).", Difficulty.MEDIUM, "7 1 5 3 6 4", "7");
+        saveTestCase(q62, "7 1 5 3 6 4", "7", false);
+        saveTestCase(q62, "1 2 3 4 5", "4", false);
+        saveTestCase(q62, "7 6 4 3 1", "0", true);
+
+        // 63. LRU Cache
+        Question q63 = saveQuestion("LRU Cache", "Design a Least Recently Used (LRU) cache with get and put operations.", Difficulty.MEDIUM, "put:1 1,put:2 2,get:1,put:3 3,get:2,put:4 4,get:1,get:3,get:4", "1 -1 -1 3 4");
+        saveTestCase(q63, "put:1 1,put:2 2,get:1,put:3 3,get:2,put:4 4,get:1,get:3,get:4", "1 -1 -1 3 4", false);
+        saveTestCase(q63, "get:1,put:1 1,get:1", "-1 1", false);
+        saveTestCase(q63, "put:1 1,put:2 2,get:1,get:2", "1 2", true);
 
         log.info("Seeded {} questions successfully!", questionRepository.count());
+
+        // Create Tests
+        User admin = userRepository.findByEmail("admin@assessment.com").orElse(null);
+        Long adminId = admin != null ? admin.getId() : null;
+
+        List<Question> allQuestions = questionRepository.findAll();
+        long qCount = allQuestions.size();
+
+        if (qCount >= 8) {
+            Test test1 = Test.builder()
+                    .title("Easy Warmup")
+                    .description("A collection of easy problems to warm up your coding skills.")
+                    .duration(60)
+                    .testType(TestType.CODING)
+                    .isActive(true)
+                    .createdBy(adminId)
+                    .build();
+            test1.addQuestion(allQuestions.get(0));
+            test1.addQuestion(allQuestions.get(1));
+            test1.addQuestion(allQuestions.get(2));
+            test1.addQuestion(allQuestions.get(10));
+            test1.addQuestion(allQuestions.get(18));
+            testRepository.save(test1);
+        }
+
+        if (qCount >= 14) {
+            Test test2 = Test.builder()
+                    .title("Array Mastery")
+                    .description("Test your array manipulation skills with two pointers, sliding window, and sorting.")
+                    .duration(90)
+                    .testType(TestType.CODING)
+                    .isActive(true)
+                    .createdBy(adminId)
+                    .build();
+            test2.addQuestion(allQuestions.get(0));
+            test2.addQuestion(allQuestions.get(4));
+            test2.addQuestion(allQuestions.get(5));
+            test2.addQuestion(allQuestions.get(13));
+            test2.addQuestion(allQuestions.get(16));
+            testRepository.save(test2);
+        }
+
+        if (qCount >= 5) {
+            Test test3 = Test.builder()
+                    .title("Tree Week")
+                    .description("Binary tree and BST problems including traversals, validation, and path finding.")
+                    .duration(90)
+                    .testType(TestType.CODING)
+                    .isActive(true)
+                    .createdBy(adminId)
+                    .build();
+            test3.addQuestion(allQuestions.get(38));
+            test3.addQuestion(allQuestions.get(41));
+            test3.addQuestion(allQuestions.get(59));
+            test3.addQuestion(allQuestions.get(60));
+            test3.addQuestion(allQuestions.get(61));
+            testRepository.save(test3);
+        }
+
+        if (qCount >= 20) {
+            Test test4 = Test.builder()
+                    .title("Dynamic Programming")
+                    .description("Classic DP problems including climbing stairs, coin change, and unique paths.")
+                    .duration(120)
+                    .testType(TestType.CODING)
+                    .isActive(true)
+                    .createdBy(adminId)
+                    .build();
+            test4.addQuestion(allQuestions.get(6));
+            test4.addQuestion(allQuestions.get(9));
+            test4.addQuestion(allQuestions.get(13));
+            test4.addQuestion(allQuestions.get(19));
+            test4.addQuestion(allQuestions.get(23));
+            test4.addQuestion(allQuestions.get(27));
+            testRepository.save(test4);
+        }
+
+        if (qCount >= 25) {
+            Test test5 = Test.builder()
+                    .title("Medium Mix")
+                    .description("A curated mix of medium problems covering graphs, strings, and backtracking.")
+                    .duration(120)
+                    .testType(TestType.CODING)
+                    .isActive(true)
+                    .createdBy(adminId)
+                    .build();
+            test5.addQuestion(allQuestions.get(3));
+            test5.addQuestion(allQuestions.get(7));
+            test5.addQuestion(allQuestions.get(11));
+            test5.addQuestion(allQuestions.get(21));
+            test5.addQuestion(allQuestions.get(22));
+            test5.addQuestion(allQuestions.get(30));
+            testRepository.save(test5);
+        }
+
+        if (qCount >= 35) {
+            Test test6 = Test.builder()
+                    .title("Hard Challenge")
+                    .description("Hard difficulty problems for advanced coders.")
+                    .duration(180)
+                    .testType(TestType.CODING)
+                    .isActive(true)
+                    .createdBy(adminId)
+                    .build();
+            test6.addQuestion(allQuestions.get(17));
+            test6.addQuestion(allQuestions.get(24));
+            test6.addQuestion(allQuestions.get(33));
+            test6.addQuestion(allQuestions.get(34));
+            test6.addQuestion(allQuestions.get(35));
+            test6.addQuestion(allQuestions.get(36));
+            testRepository.save(test6);
+        }
+
+        log.info("Created {} tests successfully!", testRepository.count());
     }
 
     private Question saveQuestion(String title, String description, Difficulty difficulty, String sampleInput, String sampleOutput) {
